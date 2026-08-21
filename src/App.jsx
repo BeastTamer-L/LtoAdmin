@@ -2,10 +2,14 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
-import Login from './pages/Login'
+import Login from './pages/LoginPage'
 import Sidebar from './components/SideBar'
 import TopSection from './components/TopSection'
-import Enforcers from './pages/Enforcers'
+import Enforcers from './pages/EnforcersPage'
+import Ticket from './pages/TicketPage'
+import TicketDetails from './pages/TicketDetails'
+import StatCard from './components/StatCard'
+import Dashboard from './pages/DashboardPage'
 import './App.css'
 function App() {
 
@@ -15,7 +19,7 @@ function App() {
       <div className="flex flex-col w-full h-full overflow-y-auto">
         <TopSection activeTab={"Enforcers"}/>
         <div className='px-6 py-6'>
-        <Enforcers />
+        <Dashboard  />
         </div>
       </div>
     </div>

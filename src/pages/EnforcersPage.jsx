@@ -2,9 +2,11 @@ import {useState} from 'react'
 import {Search, Funnel, UserRoundPlus} from "lucide-react";
 import Table from '../components/Table'
 import Logo from '../assets/logo.png'
+import EnrollmentModal from '../components/EnrollmentModal'
 
 export default function Enforcers() {
     const [search, setSearch] = useState('')
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
 
     const columns = [
@@ -156,13 +158,20 @@ export default function Enforcers() {
 
                 </div>
 
-                <button className="py-2 px-5 bg-[#0F2744] text-white rounded-lg ml-2 hover:bg-[#0F2744]/80 transition duration-300 ease-in-out flex items-center font-semibold gap-4 text-[14px]">
+                <button 
+                 onClick={() => setIsModalOpen(!isModalOpen)}
+                className="py-2 px-5 bg-[#0F2744] text-white rounded-lg ml-2 hover:bg-[#0F2744]/80 transition duration-300 ease-in-out flex items-center font-semibold gap-4 text-[14px]">
                     <UserRoundPlus className="w-4 h-4 text-white" />
                     Add Enforcer
                 </button>
 
+                <EnrollmentModal
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(!isModalOpen)}
+                />
+
             </div>
-            <Table activeTab="Enforcers" columns={columns} data={data} />
+            <Table columns={columns} data={data} />
         </div>
     )
 }

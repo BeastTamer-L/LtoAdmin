@@ -1,4 +1,4 @@
-export default function Table({ activeTab, columns, data }) {
+export default function Table({ columns, data }) {
 
 
 return (
