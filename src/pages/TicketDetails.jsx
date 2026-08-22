@@ -96,11 +96,11 @@ export default function Ticket() {
                     </Accordion>
             </div>
             <div className="px-8 py-6 flex items-center justify-end gap-2 mb-4">
-                    <button className="py-2 px-5 bg-[#ED6704] text-white rounded-lg ml-2 hover:bg-[#ED6704]/80 transition duration-300 ease-in-out flex items-center font-semibold gap-2 text-[14px]">
+                    <button className="py-2 px-5 bg-[#ED6704] text-white rounded-lg ml-2 hover:bg-[#ED6704]/80 transition duration-300 ease-in-out flex items-center font-semibold gap-2 text-[14px] active:scale-[0.98]">
                                 <PrinterCheck className="w-4 h-4 text-white" />
                                 Print 
                     </button>
-                    <button className="py-2 px-5 bg-[#0F2744] text-white rounded-lg ml-2 hover:bg-[#0F2744]/80 transition duration-300 ease-in-out flex items-center font-semibold gap-2 text-[14px]">
+                    <button className="py-2 px-5 bg-[#0F2744] text-white rounded-lg ml-2 hover:bg-[#0F2744]/80 transition duration-300 ease-in-out flex items-center font-semibold gap-2 text-[14px] active:scale-[0.98]">
                                 <FileText className="w-4 h-4 text-white" />
                                 Export PDF
                     </button>

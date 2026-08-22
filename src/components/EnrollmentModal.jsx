@@ -162,7 +162,7 @@ export default function EnrollEnforcerModal({ isOpen, onClose }) {
                         <div className="flex gap-2">
                             <button
                                 type="submit"
-                                className="rounded-[4px] bg-[#0F2744] px-6 py-3 text-[11px] font-medium text-white transition hover:bg-[#173A64]"
+                                className="rounded-[4px] bg-[#0F2744] px-6 py-3 text-[11px] font-medium text-white transition hover:bg-[#173A64] active:scale-[0.98]"
                             >
                                 Enroll Enforcer
                             </button>
@@ -182,7 +182,7 @@ export default function EnrollEnforcerModal({ isOpen, onClose }) {
                                         areaAssignment: "",
                                     })
                                 }
-                                className="rounded-[4px] bg-[#EDF1F5] px-6 py-3 text-[11px] font-medium text-[#202020] transition hover:bg-[#E0E5EA]"
+                                className="rounded-[4px] bg-[#EDF1F5] px-6 py-3 text-[11px] font-medium text-[#202020] transition hover:bg-[#E0E5EA] active:scale-[0.98]"
                             >
                                 Reset
                             </button>

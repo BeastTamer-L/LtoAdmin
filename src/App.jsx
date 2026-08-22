@@ -10,6 +10,7 @@ import Ticket from './pages/TicketPage'
 import TicketDetails from './pages/TicketDetails'
 import StatCard from './components/StatCard'
 import Dashboard from './pages/DashboardPage'
+import ReportPage from './pages/ReportPage'
 import './App.css'
 function App() {
 
@@ -19,7 +20,7 @@ function App() {
       <div className="flex flex-col w-full h-full overflow-y-auto">
         <TopSection activeTab={"Enforcers"}/>
         <div className='px-6 py-6'>
-        <Dashboard  />
+        <ReportPage  />
         </div>
       </div>
     </div>

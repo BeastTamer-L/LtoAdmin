@@ -108,7 +108,7 @@ export default function Dashboard(){
                 <div className="w-full h-[350px] max-h-[350px] overflow-hidden  rounded-md border border-[#E2E8F0] bg-white px-6 py-5 shadow-xs col-span-3">
                     <div className="flex items-center justify-between text-[12px] mb-4">
                         <span>ACTIVE ENFORCERS</span>
-                        <button className="flex gap-3 text-[#4F6AD8]">
+                        <button className="flex gap-3 text-[#4F6AD8] transition active:scale-[0.98]">
                             View All
                             <MoveRight className="w-5 h-5" />
                         </button>

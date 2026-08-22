@@ -101,6 +101,7 @@ export default function Sidebar() {
                     flex items-center gap-4
                     text-sm
                     transition-all duration-200
+                    active:scale-[0.98]
                     ${
                     active === item.name
                         ? "bg-white text-[#F96800] font-semibold shadow-sm"
@@ -141,6 +142,7 @@ export default function Sidebar() {
                     flex items-center gap-4
                     text-sm
                     transition-all duration-200
+                    active:scale-[0.98]
                     ${
                     active === item.name
                         ? "bg-white text-[#F96800] font-semibold shadow-sm"
