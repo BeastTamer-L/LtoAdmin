@@ -307,7 +307,9 @@ export default function Sidebar() {
           `}
         >
           {/* Avatar */}
-          <div className="w-9 h-9 rounded-full bg-[#F96800] flex items-center justify-center shrink-0">
+          <div 
+          onClick={() => setCollapsed(false)}
+          className="w-9 h-9 rounded-full bg-[#F96800] flex items-center justify-center shrink-0">
             <span className="text-xs font-bold text-white">
               JD
             </span>

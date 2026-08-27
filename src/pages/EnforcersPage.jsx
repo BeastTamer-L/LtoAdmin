@@ -1,141 +1,194 @@
-import {useState} from 'react'
-import {Search, Funnel, UserRoundPlus} from "lucide-react";
+import { useState } from 'react'
+import { Search, Funnel, UserRoundPlus, SquarePen, UserX } from "lucide-react";
 import Table from '../components/Table'
 import Logo from '../assets/logo.png'
 import EnrollmentModal from '../components/EnrollmentModal'
+import Modal from '../components/Modal'
 
 export default function Enforcers() {
     const [search, setSearch] = useState('')
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    
+    // Modal states
+    const [isEnrollModalOpen, setIsEnrollModalOpen] = useState(false);
+    const [isDeactivateModalOpen, setIsDeactivateModalOpen] = useState(false);
+    
+    // Action and target data state
+    const [action, setAction] = useState("enroll"); // "enroll" or "edit"
+    const [selectedEnforcer, setSelectedEnforcer] = useState(null);
 
+    // Handlers
+    const handleOpenEnroll = () => {
+        setAction("enroll");
+        setSelectedEnforcer(null);
+        setIsEnrollModalOpen(true);
+    };
+
+    const handleEdit = (row) => {
+        setAction("edit");
+        setSelectedEnforcer(row);
+        setIsEnrollModalOpen(true);
+    };
+
+    const handleDeactivate = (row) => {
+        setSelectedEnforcer(row);
+        setIsDeactivateModalOpen(true);
+    };
+
+    const confirmDeactivate = () => {
+        console.log("Deactivating enforcer:", selectedEnforcer);
+        // Insert API call to deactivate here
+        setIsDeactivateModalOpen(false);
+    };
 
     const columns = [
-    {
-        key: "enforcer",
-        label: "Enforcer",
-        render: (row) => (
-            <div className="flex items-center gap-3">
-                <img
-                src={row.profilePicture}
-                alt={row.enforcer}
-                className="h-9 w-9 rounded-full object-cover"
-                />
-                <div>
-                    <span className="font-medium text-black block font-semibold">
-                    {row.enforcer}
-                    </span>
-                    <span className="font-medium text-gray-800 text-[12px]">
-                    {row.email}
-                    </span>
+        {
+            key: "enforcer",
+            label: "Enforcer",
+            render: (row) => (
+                <div className="flex items-center gap-3">
+                    <img
+                        src={row.profilePicture}
+                        alt={row.enforcer}
+                        className="h-9 w-9 rounded-full object-cover"
+                    />
+                    <div>
+                        <span className="font-semibold text-black block">
+                            {row.enforcer}
+                        </span>
+                        <span className="font-medium text-gray-800 text-[12px]">
+                            {row.email}
+                        </span>
+                    </div>
                 </div>
-            </div>
-        )
-    },
-    {
-        key: "badgeNo",
-        label: "Badge Number",
-    },
-    {
-        key: "status",
-        label: "Status",
-        render: (row) => (
-        <span
-            className={
-                row.status === "Active"
-                ? "rounded-full bg-[#15803D]/20 px-3 py-1 text-xs text-[#15803D] font-semibold"
-                : "rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-500 font-semibold"
-            }
-        >
-        {row.status}
-        </span>
-        )
-    },
-    {
-        key: "assignedArea",
-        label: "Assigned Area",
-    },
-    {
-        key: "lastActive",
-        label: "Last Active",
-    },
+            )
+        },
+        {
+            key: "badgeNo",
+            label: "Badge Number",
+        },
+        {
+            key: "status",
+            label: "Status",
+            render: (row) => (
+                <span
+                    className={
+                        row.status === "Active"
+                            ? "rounded-full bg-[#15803D]/20 px-3 py-1 text-xs text-[#15803D] font-semibold"
+                            : "rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-500 font-semibold"
+                    }
+                >
+                    {row.status}
+                </span>
+            )
+        },
+        {
+            key: "assignedArea",
+            label: "Assigned Area",
+        },
+        {
+            key: "lastActive",
+            label: "Last Active",
+        },
+        {
+            key: "actions",
+            label: "Actions",
+            render: (row) => (
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => handleEdit(row)}
+                        className="flex items-center gap-2 rounded-md bg-slate-100 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200 transition"
+                        title="Edit Enforcer"
+                    >
+                        <SquarePen className="w-3.5 h-3.5 text-slate-600" />
+                        Edit
+                    </button>
+                    <button
+                        onClick={() => handleDeactivate(row)}
+                        className="flex items-center gap-2 rounded-md bg-red-50 px-2.5 py-1.5 text-xs font-medium text-red-600 hover:bg-red-100 transition"
+                        title="Deactivate Enforcer"
+                    >
+                        <UserX className="w-3.5 h-3.5 text-red-600" />
+                        Deactivate
+                    </button>
+                </div>
+            )
+        }
     ];
 
     const data = [
-    {
-        enforcer: "Juan Dela Cruz",
-        badgeNo: "NC-1024",
-        status: "Active",
-        assignedArea: "Brgy. 176, Bagong Silang",
-        lastActive: "Just now",
-        email: "sarah.w@trafficam.gov",
-        profilePicture: Logo
-    },
-    {
-        enforcer: "Mark Anthony Santos",
-        badgeNo: "NC-1025",
-        status: "Active",
-        assignedArea: "Novaliches Proper",
-        lastActive: "2 mins ago",
-        email: "mark.s@trafficam.gov",
-        profilePicture: Logo
-    },
-    {
-        enforcer: "Ramon Garcia",
-        badgeNo: "NC-1026",
-        status: "Offline",
-        assignedArea: "Tala",
-        lastActive: "15 mins ago",
-        email: "mark.s@trafficam.gov",
-        profilePicture: Logo  
-    },
-    {
-        enforcer: "Carlo Reyes",
-        badgeNo: "NC-1027",
-        status: "Offline",
-        assignedArea: "Brgy. 171, Bagumbong",
-        lastActive: "1 hour ago",
-        email: "mark.s@trafficam.gov",
-        profilePicture: Logo  
-    },
-    {
-        enforcer: "Michael Flores",
-        badgeNo: "NC-1028",
-        status: "Active",
-        assignedArea: "Kaybiga",
-        lastActive: "5 mins ago",
-        email: "mark.s@trafficam.gov",
-        profilePicture: Logo  
-    },
-    {
-        enforcer: "Daniel Mendoza",
-        badgeNo: "NC-1029",
-        status: "Active",
-        assignedArea: "Camarin",
-        lastActive: "Just now",
-        email: "mark.s@trafficam.gov",
-        profilePicture: Logo
-    },
-    {
-        enforcer: "Kevin Bautista",
-        badgeNo: "NC-1030",
-        status: "Offline",
-        assignedArea: "Deparo",
-        lastActive: "22 mins ago",
-        email: "mark.s@trafficam.gov",
-        profilePicture: Logo
-    },
-    {
-        enforcer: "Patrick Villanueva",
-        badgeNo: "NC-1031",
-        status: "Offline",
-        assignedArea: "Kalayaan Village",
-        lastActive: "2 hours ago",
-        email: "mark.s@trafficam.gov",
-        profilePicture: Logo  
-    },
+        {
+            enforcer: "Juan Dela Cruz",
+            badgeNo: "NC-1024",
+            status: "Active",
+            assignedArea: "Brgy. 176, Bagong Silang",
+            lastActive: "Just now",
+            email: "sarah.w@trafficam.gov",
+            profilePicture: Logo
+        },
+        {
+            enforcer: "Mark Anthony Santos",
+            badgeNo: "NC-1025",
+            status: "Active",
+            assignedArea: "Novaliches Proper",
+            lastActive: "2 mins ago",
+            email: "mark.s@trafficam.gov",
+            profilePicture: Logo
+        },
+        {
+            enforcer: "Ramon Garcia",
+            badgeNo: "NC-1026",
+            status: "Offline",
+            assignedArea: "Tala",
+            lastActive: "15 mins ago",
+            email: "mark.s@trafficam.gov",
+            profilePicture: Logo  
+        },
+        {
+            enforcer: "Carlo Reyes",
+            badgeNo: "NC-1027",
+            status: "Offline",
+            assignedArea: "Brgy. 171, Bagumbong",
+            lastActive: "1 hour ago",
+            email: "mark.s@trafficam.gov",
+            profilePicture: Logo  
+        },
+        {
+            enforcer: "Michael Flores",
+            badgeNo: "NC-1028",
+            status: "Active",
+            assignedArea: "Kaybiga",
+            lastActive: "5 mins ago",
+            email: "mark.s@trafficam.gov",
+            profilePicture: Logo  
+        },
+        {
+            enforcer: "Daniel Mendoza",
+            badgeNo: "NC-1029",
+            status: "Active",
+            assignedArea: "Camarin",
+            lastActive: "Just now",
+            email: "mark.s@trafficam.gov",
+            profilePicture: Logo
+        },
+        {
+            enforcer: "Kevin Bautista",
+            badgeNo: "NC-1030",
+            status: "Offline",
+            assignedArea: "Deparo",
+            lastActive: "22 mins ago",
+            email: "mark.s@trafficam.gov",
+            profilePicture: Logo
+        },
+        {
+            enforcer: "Patrick Villanueva",
+            badgeNo: "NC-1031",
+            status: "Offline",
+            assignedArea: "Kalayaan Village",
+            lastActive: "2 hours ago",
+            email: "mark.s@trafficam.gov",
+            profilePicture: Logo  
+        },
     ];
-
-
 
     return (
         <div className='bg-white w-full h-full border-[1px] border-[#E2E8F0] px-6 py-6 rounded-lg'>
@@ -155,23 +208,40 @@ export default function Enforcers() {
                         <Funnel className="w-4 h-4 text-white" />
                         Filter
                     </button>
-
                 </div>
 
                 <button 
-                 onClick={() => setIsModalOpen(!isModalOpen)}
-                className="py-2 px-5 bg-[#0F2744] text-white rounded-lg ml-2 hover:bg-[#0F2744]/80 transition duration-300 ease-in-out flex items-center font-semibold gap-4 text-[14px]">
+                    onClick={handleOpenEnroll}
+                    className="py-2 px-5 bg-[#0F2744] text-white rounded-lg ml-2 hover:bg-[#0F2744]/80 transition duration-300 ease-in-out flex items-center font-semibold gap-4 text-[14px]"
+                >
                     <UserRoundPlus className="w-4 h-4 text-white" />
                     Add Enforcer
                 </button>
 
-                <EnrollmentModal
-                    isOpen={isModalOpen}
-                    onClose={() => setIsModalOpen(!isModalOpen)}
-                />
-
             </div>
+
             <Table columns={columns} data={data} />
+
+            {/* Enroll / Edit Modal */}
+            <EnrollmentModal
+                isOpen={isEnrollModalOpen}
+                onClose={() => setIsEnrollModalOpen(false)}
+                action={action}
+                initialData={selectedEnforcer}
+                handleSubmit={(formData) => console.log("Submitted:", formData)}
+            />
+
+            {/* Deactivation Confirmation Modal */}
+            <Modal 
+                isOpen={isDeactivateModalOpen}
+                onClose={() => setIsDeactivateModalOpen(false)}
+                title={`Deactivate ${selectedEnforcer?.enforcer || "Enforcer"}?`}
+                description={`This will prevent ${selectedEnforcer?.enforcer || "the enforcer"} (${selectedEnforcer?.badgeNo || ""}) from accessing the TraffiCam system. You can reactivate the account at any time.`}
+                onConfirm={confirmDeactivate}
+                confirmText="Deactivate"
+                cancelText="Cancel"
+                color = "#CC2B2B"
+            />
         </div>
     )
 }
