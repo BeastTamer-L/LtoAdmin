@@ -112,7 +112,7 @@ export default function Sidebar() {
             <div className="relative w-10 h-10 flex items-center justify-center shrink-0">
               <img
                 src={Logo}
-                alt="TraffiCam Logo"
+                alt="CAMOTE Logo"
                 className="w-full h-full object-contain"
               />
             </div>
@@ -120,7 +120,7 @@ export default function Sidebar() {
             {!collapsed && (
               <div className="whitespace-nowrap">
                 <h1 className="text-[18px] font-bold">
-                  Traffi<span className="text-[#F96800]">Cam</span>
+                  <span className="text-[#e7600d]">CAM</span><span className="text-[#243c56]">OTE</span>
                 </h1>
 
                 <p className="text-[12px] text-[#F5F7FA]">

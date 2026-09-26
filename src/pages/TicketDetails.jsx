@@ -41,7 +41,7 @@ export default function Ticket() {
             <div className='bg-white w-full h-max border-[1px] border-[#E2E8F0] rounded-lg'>
                 <div className='flex items-center justify-between mb-4 w-full bg-[#0F2744] rounded-t-lg'>
                     <div className='flex flex-col items-start px-6 py-6'>
-                        <h1 className='text-white text-[16px] font-semibold'>Traffi<span className='text-[#ED6704]'>Cam</span></h1>
+                        <h1 className='text-white text-[16px] font-semibold'><span className='text-[#e7600d]'>CAM</span><span className='text-[#243c56]'>OTE</span></h1>
                         <span className='text-white text-[14px]'>North Caloocan City Traffic Office - Complete Violation Case</span>
                     </div>
                     <h1 className='text-white text-[16px] font-semibold px-6 py-6'>{ticket.ticketNo}</h1>

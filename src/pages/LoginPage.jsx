@@ -37,7 +37,7 @@ export default function Login() {
                <div className="flex justify-center mb-4">
                    <img src={Logo} alt="Logo" className="w-[100px] h-[100px]" />
                </div>
-               <h2 className="text-2xl font-extrabold mb-8 text-center">Traffi<span className="text-[#ED6704]">Cam</span></h2>
+               <h2 className="text-2xl font-extrabold mb-8 text-center"><span className="text-[#e7600d]">CAM</span><span className="text-[#243c56]">OTE</span></h2>
                <form onSubmit={handleLogin}>
                    <div className="mb-4 relative">
                        <CircleUserRound
@@ -90,7 +90,7 @@ export default function Login() {
                    </div>
                    <div className="flex items-center justify-between">
                        <button
-                           className="w-full bg-[#0F2744] hover:bg-[#0F2744]/80 text-white font-bold py-4 px-4 rounded-2xl   focus:outline-none focus:shadow-outline transition duration-300 ease-in-out active:scale-[0.98]"
+                           className="w-full bg-[#0F2744] hover:bg-[#0F2744]/80 text-white font-bold py-4 px-4 rounded-2xl cursor-pointer focus:outline-none focus:shadow-outline transition duration-300 ease-in-out active:scale-[0.98]"
                            type="submit"
                            disabled={isSubmitting}
                        >

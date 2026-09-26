@@ -71,7 +71,7 @@ export default function EnrollEnforcerModal({
                                     Enroll New Enforcer
                                 </h2>
                                 <p className="mt-0.5 text-[11px] text-[#8693A6]">
-                                    Register a new traffic enforcer and assign a TraffiCam body-worn camera device.
+                                    Register a new traffic enforcer and assign a CAMOTE body-worn camera device.
                                 </p>
                            </div>
                         ) : (

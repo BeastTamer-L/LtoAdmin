@@ -122,7 +122,7 @@ export default function Enforcers() {
             status: "Active",
             assignedArea: "Brgy. 176, Bagong Silang",
             lastActive: "Just now",
-            email: "sarah.w@trafficam.gov",
+            email: "sarah.w@camote.gov",
             profilePicture: Logo
         },
         {
@@ -131,7 +131,7 @@ export default function Enforcers() {
             status: "Active",
             assignedArea: "Novaliches Proper",
             lastActive: "2 mins ago",
-            email: "mark.s@trafficam.gov",
+            email: "mark.s@camote.gov",
             profilePicture: Logo
         },
         {
@@ -140,7 +140,7 @@ export default function Enforcers() {
             status: "Offline",
             assignedArea: "Tala",
             lastActive: "15 mins ago",
-            email: "mark.s@trafficam.gov",
+            email: "mark.s@camote.gov",
             profilePicture: Logo  
         },
         {
@@ -149,7 +149,7 @@ export default function Enforcers() {
             status: "Offline",
             assignedArea: "Brgy. 171, Bagumbong",
             lastActive: "1 hour ago",
-            email: "mark.s@trafficam.gov",
+            email: "mark.s@camote.gov",
             profilePicture: Logo  
         },
         {
@@ -158,7 +158,7 @@ export default function Enforcers() {
             status: "Active",
             assignedArea: "Kaybiga",
             lastActive: "5 mins ago",
-            email: "mark.s@trafficam.gov",
+            email: "mark.s@camote.gov",
             profilePicture: Logo  
         },
         {
@@ -167,7 +167,7 @@ export default function Enforcers() {
             status: "Active",
             assignedArea: "Camarin",
             lastActive: "Just now",
-            email: "mark.s@trafficam.gov",
+            email: "mark.s@camote.gov",
             profilePicture: Logo
         },
         {
@@ -176,7 +176,7 @@ export default function Enforcers() {
             status: "Offline",
             assignedArea: "Deparo",
             lastActive: "22 mins ago",
-            email: "mark.s@trafficam.gov",
+            email: "mark.s@camote.gov",
             profilePicture: Logo
         },
         {
@@ -185,7 +185,7 @@ export default function Enforcers() {
             status: "Offline",
             assignedArea: "Kalayaan Village",
             lastActive: "2 hours ago",
-            email: "mark.s@trafficam.gov",
+            email: "mark.s@camote.gov",
             profilePicture: Logo  
         },
     ];
@@ -236,7 +236,7 @@ export default function Enforcers() {
                 isOpen={isDeactivateModalOpen}
                 onClose={() => setIsDeactivateModalOpen(false)}
                 title={`Deactivate ${selectedEnforcer?.enforcer || "Enforcer"}?`}
-                description={`This will prevent ${selectedEnforcer?.enforcer || "the enforcer"} (${selectedEnforcer?.badgeNo || ""}) from accessing the TraffiCam system. You can reactivate the account at any time.`}
+                description={`This will prevent ${selectedEnforcer?.enforcer || "the enforcer"} (${selectedEnforcer?.badgeNo || ""}) from accessing the CAMOTE system. You can reactivate the account at any time.`}
                 onConfirm={confirmDeactivate}
                 confirmText="Deactivate"
                 cancelText="Cancel"
