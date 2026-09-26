@@ -8,35 +8,54 @@ import ReportPage from '../pages/ReportPage'
 import PageLayout from '../layouts/PageLayout'
 import ProtectedRoute from "./ProtectedRoute";
 import '../App.css'
+
 export default function AppRoutes() {
-
   return (
-     <BrowserRouter>
+    <BrowserRouter>
       <Routes>
-
-        {/* Login */}
+        {/* Public routes */}
         <Route path="/login" element={<LoginPage />} />
 
-        {/* Dashboard Layout */}
-        <Route element={<ProtectedRoute/>}>
-            <Route element={<PageLayout />}>
+        {/* Protected routes - requires authentication */}
+        <Route element={<ProtectedRoute />}>
+          <Route element={<PageLayout />}>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
+            {/* Dashboard - accessible to all authenticated roles */}
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/enforcers" element={<Enforcers />} />
+
+            {/* Enforcers management - admin and superadmin only */}
+            <Route
+              path="/enforcers"
+              element={<ProtectedRoute allowedRoles={['superadmin', 'admin']} />}>
+              <Route index element={<Enforcers />} />
+            </Route>
+
+            {/* Ticket viewing - all authenticated roles can view */}
             <Route path="/tickets" element={<Ticket />} />
             <Route path="/tickets/:id" element={<TicketDetails />} />
-            <Route path="/reports" element={<ReportPage />} />
 
-
-            {/* <Route path="/settings" element={<Settings />} /> */}
-            {/* <Route path="/support" element={<Support />} /> */}
+            {/* Reports - admin and superadmin only */}
+            <Route
+              path="/reports"
+              element={<ProtectedRoute allowedRoles={['superadmin', 'admin']} />}>
+              <Route index element={<ReportPage />} />
             </Route>
+
+            {/* Example: Superadmin only route */}
+            {/*
+            <Route
+              path="/system-settings"
+              element={<ProtectedRoute allowedRoles={['superadmin']} />}>
+                <SystemSettings />
+            </Route>
+            */}
+          </Route>
         </Route>
-        <Route path="*" element={<Navigate to="/login" replace />}/>
+
+        {/* Catch-all for undefined routes */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
   )
 }
-
-

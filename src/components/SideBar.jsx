@@ -14,6 +14,8 @@ import {
 
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import { supabase } from '../supabaseClient';
+import { useAuth } from '../context/AuthContext';
 import LogoutModal from "./LogoutModal";
 
 const menuItems = [
@@ -55,13 +57,19 @@ const bottomItems = [
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { user, profile, loading } = useAuth();
 
   const navigate = useNavigate();
 
-  const handleConfirm = () => {
-    localStorage.removeItem("isAuthenticated");
-    setIsModalOpen(false);
-    navigate("/login");
+  const handleConfirm = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setIsModalOpen(false);
+      navigate("/login");
+    }
   };
 
   return (
@@ -307,26 +315,19 @@ export default function Sidebar() {
           `}
         >
           {/* Avatar */}
-          <div 
+          <div
           onClick={() => setCollapsed(false)}
           className="w-9 h-9 rounded-full bg-[#F96800] flex items-center justify-center shrink-0">
-            <span className="text-xs font-bold text-white">
-              JD
-            </span>
-          </div>
-
-          {/* User Information */}
-          {!collapsed && (
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-white truncate">
-                James Doe
-              </p>
-
-              <p className="text-[11px] text-[#9FB0C0]">
-                Administrator
-              </p>
+            {!loading && profile ? (
+              <span className="text-xs font-bold text-white">
+                {profile.first_name?.charAt(0) || '?'}{profile.last_name?.charAt(0) || '?'}
+              </span>
+) : (
+              <span className="text-xs font-bold text-white">
+                JD
+              </span>
+)}
             </div>
-          )}
 
           {/* Logout */}
           {!collapsed && (
