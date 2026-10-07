@@ -1,9 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Search, Funnel, UserRoundPlus, SquarePen, UserX } from "lucide-react";
 import Table from '../components/Table'
 import Logo from '../assets/logo.png'
 import EnrollmentModal from '../components/EnrollmentModal'
 import Modal from '../components/Modal'
+import { toast } from 'sonner';
+import { createEmployeeInviteAndSendEmail, createProfileAccount } from '../lib/userInvites';
+import { supabase } from '../supabaseClient';
 
 export default function Enforcers() {
     const [search, setSearch] = useState('')
@@ -15,6 +18,29 @@ export default function Enforcers() {
     // Action and target data state
     const [action, setAction] = useState("enroll"); // "enroll" or "edit"
     const [selectedEnforcer, setSelectedEnforcer] = useState(null);
+    const [saving, setSaving] = useState(false);
+    const [profiles, setProfiles] = useState([]);
+    const [loadingProfiles, setLoadingProfiles] = useState(true);
+
+    const loadProfiles = async () => {
+        setLoadingProfiles(true);
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('id, first_name, middle_name, last_name, email, phone_number, badge_number, position, is_active, last_login_at, created_at')
+            .eq('role', 'enforcer')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            toast.error(`Failed to load enforcers: ${error.message}`);
+        } else {
+            setProfiles(data || []);
+        }
+        setLoadingProfiles(false);
+    };
+
+    useEffect(() => {
+        loadProfiles();
+    }, []);
 
     // Handlers
     const handleOpenEnroll = () => {
@@ -38,6 +64,61 @@ export default function Enforcers() {
         console.log("Deactivating enforcer:", selectedEnforcer);
         // Insert API call to deactivate here
         setIsDeactivateModalOpen(false);
+    };
+
+    const handleSubmit = async (formData, formAction) => {
+        setSaving(true);
+        try {
+            const profilePayload = {
+                first_name: formData.firstName.trim(),
+                middle_name: formData.middleName.trim() || null,
+                last_name: formData.lastName.trim(),
+                email: formData.email.trim().toLowerCase(),
+                phone_number: formData.phone.trim() || null,
+                badge_number: formData.badgeNumber.trim() || null,
+                position: formData.rank.trim() || null,
+            };
+
+            if (formAction === "edit") {
+                const { error } = await supabase
+                    .from('profiles')
+                    .update(profilePayload)
+                    .eq('id', selectedEnforcer.id);
+
+                if (error) throw error;
+
+                setIsEnrollModalOpen(false);
+                await loadProfiles();
+                toast.success("Enforcer personal information updated.");
+                return;
+            }
+
+            const profile = await createProfileAccount({
+                firstName: profilePayload.first_name,
+                middleName: profilePayload.middle_name,
+                lastName: profilePayload.last_name,
+                email: profilePayload.email,
+                phoneNumber: profilePayload.phone_number,
+                badgeNumber: profilePayload.badge_number,
+                position: profilePayload.position,
+                role: "enforcer",
+            });
+
+            await createEmployeeInviteAndSendEmail({
+                userId: profile.id,
+                email: formData.email,
+                toName: `${formData.firstName} ${formData.lastName}`.trim(),
+                role: "enforcer",
+            });
+
+            setIsEnrollModalOpen(false);
+            await loadProfiles();
+            toast.success("Enforcer account created and activation email sent.");
+        } catch (error) {
+            toast.error(error.message || "Unable to create the enforcer account.");
+        } finally {
+            setSaving(false);
+        }
     };
 
     const columns = [
@@ -115,80 +196,31 @@ export default function Enforcers() {
         }
     ];
 
-    const data = [
-        {
-            enforcer: "Juan Dela Cruz",
-            badgeNo: "NC-1024",
-            status: "Active",
-            assignedArea: "Brgy. 176, Bagong Silang",
-            lastActive: "Just now",
-            email: "sarah.w@camote.gov",
-            profilePicture: Logo
-        },
-        {
-            enforcer: "Mark Anthony Santos",
-            badgeNo: "NC-1025",
-            status: "Active",
-            assignedArea: "Novaliches Proper",
-            lastActive: "2 mins ago",
-            email: "mark.s@camote.gov",
-            profilePicture: Logo
-        },
-        {
-            enforcer: "Ramon Garcia",
-            badgeNo: "NC-1026",
-            status: "Offline",
-            assignedArea: "Tala",
-            lastActive: "15 mins ago",
-            email: "mark.s@camote.gov",
-            profilePicture: Logo  
-        },
-        {
-            enforcer: "Carlo Reyes",
-            badgeNo: "NC-1027",
-            status: "Offline",
-            assignedArea: "Brgy. 171, Bagumbong",
-            lastActive: "1 hour ago",
-            email: "mark.s@camote.gov",
-            profilePicture: Logo  
-        },
-        {
-            enforcer: "Michael Flores",
-            badgeNo: "NC-1028",
-            status: "Active",
-            assignedArea: "Kaybiga",
-            lastActive: "5 mins ago",
-            email: "mark.s@camote.gov",
-            profilePicture: Logo  
-        },
-        {
-            enforcer: "Daniel Mendoza",
-            badgeNo: "NC-1029",
-            status: "Active",
-            assignedArea: "Camarin",
-            lastActive: "Just now",
-            email: "mark.s@camote.gov",
-            profilePicture: Logo
-        },
-        {
-            enforcer: "Kevin Bautista",
-            badgeNo: "NC-1030",
-            status: "Offline",
-            assignedArea: "Deparo",
-            lastActive: "22 mins ago",
-            email: "mark.s@camote.gov",
-            profilePicture: Logo
-        },
-        {
-            enforcer: "Patrick Villanueva",
-            badgeNo: "NC-1031",
-            status: "Offline",
-            assignedArea: "Kalayaan Village",
-            lastActive: "2 hours ago",
-            email: "mark.s@camote.gov",
-            profilePicture: Logo  
-        },
-    ];
+    const data = profiles
+        .filter((profile) => {
+            const query = search.trim().toLowerCase();
+            const name = `${profile.first_name || ''} ${profile.middle_name || ''} ${profile.last_name || ''}`;
+            return !query || `${name} ${profile.email || ''} ${profile.badge_number || ''}`.toLowerCase().includes(query);
+        })
+        .map((profile) => ({
+            id: profile.id,
+            firstName: profile.first_name || '',
+            middleName: profile.middle_name || '',
+            lastName: profile.last_name || '',
+            rank: profile.position || '',
+            badgeNumber: profile.badge_number || '',
+            phone: profile.phone_number || '',
+            iotDeviceId: '',
+            homeStation: '',
+            areaAssignment: '',
+            enforcer: `${profile.first_name} ${profile.middle_name ? `${profile.middle_name} ` : ''}${profile.last_name}`,
+            badgeNo: profile.badge_number || '—',
+            status: profile.is_active ? 'Active' : 'Inactive',
+            assignedArea: '—',
+            lastActive: profile.last_login_at ? new Date(profile.last_login_at).toLocaleString() : 'Never',
+            email: profile.email,
+            profilePicture: Logo,
+        }));
 
     return (
         <div className='bg-white w-full h-full border-[1px] border-[#E2E8F0] px-6 py-6 rounded-lg'>
@@ -220,7 +252,11 @@ export default function Enforcers() {
 
             </div>
 
-            <Table columns={columns} data={data} />
+            {loadingProfiles ? (
+                <div className="py-12 text-center text-sm text-[#8693A6]">Loading registered enforcers...</div>
+            ) : (
+                <Table columns={columns} data={data} />
+            )}
 
             {/* Enroll / Edit Modal */}
             <EnrollmentModal
@@ -228,7 +264,8 @@ export default function Enforcers() {
                 onClose={() => setIsEnrollModalOpen(false)}
                 action={action}
                 initialData={selectedEnforcer}
-                handleSubmit={(formData) => console.log("Submitted:", formData)}
+                handleSubmit={handleSubmit}
+                isSaving={saving}
             />
 
             {/* Deactivation Confirmation Modal */}

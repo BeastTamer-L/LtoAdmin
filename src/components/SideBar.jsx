@@ -10,6 +10,7 @@ import {
   Ticket,
   ChevronLeft,
   ChevronRight,
+  Eye,
 } from "lucide-react";
 
 import { useState } from "react";
@@ -39,6 +40,11 @@ const menuItems = [
     icon: FileText,
     path: "/reports",
   },
+  {
+    name: "Security Monitor",
+    icon: Eye,
+    path: "/security",
+  },
 ];
 
 const bottomItems = [
@@ -57,7 +63,7 @@ const bottomItems = [
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { user, profile, loading } = useAuth();
+  const { profile, loading } = useAuth();
 
   const navigate = useNavigate();
 

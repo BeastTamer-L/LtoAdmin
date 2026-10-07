@@ -1,10 +1,12 @@
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Enforcers from '../pages/EnforcersPage'
 import Ticket from '../pages/TicketPage'
 import TicketDetails from '../pages/TicketDetails'
 import LoginPage from '../pages/LoginPage'
 import Dashboard from '../pages/DashboardPage'
 import ReportPage from '../pages/ReportPage'
+import SecurityMonitorPage from '../pages/SecurityMonitorPage'
+import ActivateAccountPage from '../pages/ActivateAccountPage'
 import PageLayout from '../layouts/PageLayout'
 import ProtectedRoute from "./ProtectedRoute";
 import '../App.css'
@@ -15,6 +17,7 @@ export default function AppRoutes() {
       <Routes>
         {/* Public routes */}
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/activate-account" element={<ActivateAccountPage />} />
 
         {/* Protected routes - requires authentication */}
         <Route element={<ProtectedRoute />}>
@@ -40,6 +43,13 @@ export default function AppRoutes() {
               path="/reports"
               element={<ProtectedRoute allowedRoles={['superadmin', 'admin']} />}>
               <Route index element={<ReportPage />} />
+            </Route>
+
+            {/* Security Monitoring - admin and superadmin only */}
+            <Route
+              path="/security"
+              element={<ProtectedRoute allowedRoles={['superadmin', 'admin']} />}>
+              <Route index element={<SecurityMonitorPage />} />
             </Route>
 
             {/* Example: Superadmin only route */}
