@@ -9,6 +9,7 @@ import SecurityMonitorPage from '../pages/SecurityMonitorPage'
 import ActivateAccountPage from '../pages/ActivateAccountPage'
 import PageLayout from '../layouts/PageLayout'
 import ProtectedRoute from "./ProtectedRoute";
+import LicenseDatabase from "../pages/LicenseDatabase";
 import '../App.css'
 
 export default function AppRoutes() {
@@ -50,6 +51,13 @@ export default function AppRoutes() {
               path="/security"
               element={<ProtectedRoute allowedRoles={['superadmin', 'admin']} />}>
               <Route index element={<SecurityMonitorPage />} />
+            </Route>
+
+            {/* License Database - admin and superadmin only */}
+            <Route
+              path="/license-database"
+              element={<ProtectedRoute allowedRoles={['superadmin', 'admin']} />}>
+              <Route index element={<LicenseDatabase />} />
             </Route>
 
             {/* Example: Superadmin only route */}

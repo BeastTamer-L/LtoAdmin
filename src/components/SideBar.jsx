@@ -11,6 +11,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Eye,
+  IdCard,
 } from "lucide-react";
 
 import { useState } from "react";
@@ -45,7 +46,13 @@ const menuItems = [
     icon: Eye,
     path: "/security",
   },
+  {
+  name: "License Database",
+  icon: IdCard,
+  path: "/license-database",
+},
 ];
+
 
 const bottomItems = [
   {
