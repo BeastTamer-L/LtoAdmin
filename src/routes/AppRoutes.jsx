@@ -7,6 +7,7 @@ import Dashboard from '../pages/DashboardPage'
 import ReportPage from '../pages/ReportPage'
 import SecurityMonitorPage from '../pages/SecurityMonitorPage'
 import ActivateAccountPage from '../pages/ActivateAccountPage'
+import ForgotPasswordPage from '../pages/ForgotPasswordPage'
 import PageLayout from '../layouts/PageLayout'
 import ProtectedRoute from "./ProtectedRoute";
 import LicenseDatabase from "../pages/LicenseDatabase";
@@ -19,6 +20,7 @@ export default function AppRoutes() {
         {/* Public routes */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/activate-account" element={<ActivateAccountPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
         {/* Protected routes - requires authentication */}
         <Route element={<ProtectedRoute />}>

@@ -19,9 +19,11 @@ export const AuthProvider = ({ children }) => {
 
       if (error) throw error;
       setProfile(data);
+      return data;
     } catch (err) {
       console.error('Error loading user profile:', err.message);
       setProfile(null);
+      return null;
     }
   };
 
@@ -32,9 +34,16 @@ export const AuthProvider = ({ children }) => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!mounted) return;
 
-      setUser(session?.user ?? null);
       if (session?.user) {
-        await fetchProfile(session.user.id);
+        const profile = await fetchProfile(session.user.id);
+        if (profile?.role?.toLowerCase() === 'enforcer') {
+          await supabase.auth.signOut();
+          if (mounted) setUser(null);
+        } else if (mounted) {
+          setUser(session.user);
+        }
+      } else {
+        setUser(null);
       }
       if (mounted) setLoading(false);
     };
@@ -44,10 +53,16 @@ export const AuthProvider = ({ children }) => {
     // Listen for auth state changes (login, logout, token refresh)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
-        setUser(session?.user ?? null);
         if (session?.user) {
-          await fetchProfile(session.user.id);
+          const profile = await fetchProfile(session.user.id);
+          if (profile?.role?.toLowerCase() === 'enforcer') {
+            await supabase.auth.signOut();
+            setUser(null);
+          } else {
+            setUser(session.user);
+          }
         } else {
+          setUser(null);
           setProfile(null);
         }
         setLoading(false);

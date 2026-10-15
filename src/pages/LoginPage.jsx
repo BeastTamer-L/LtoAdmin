@@ -3,7 +3,6 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import {
   EyeIcon,
   EyeSlashIcon,
-  ExclamationTriangleIcon,
   LockClosedIcon,
   UserIcon,
 } from "@heroicons/react/24/solid";
@@ -25,14 +24,27 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
-
-  if (user) {
-    return <Navigate to="/dashboard" replace />;
-  }
+  const [lockoutSeconds, setLockoutSeconds] = useState(0);
 
   // ── Server-side exponential backoff rate limiter ───────────
   const secured = useSecuredCountdown();
   const isLocked = secured.locked;
+  const lockoutActive = isLocked && (secured.isPermanentlyBanned || lockoutSeconds > 0 || secured.secondsLeft > 0);
+
+  useEffect(() => {
+    if (isLocked) setError('');
+    if (!isLocked || secured.isPermanentlyBanned) {
+      setLockoutSeconds(0);
+      return undefined;
+    }
+
+    setLockoutSeconds(Math.max(0, secured.secondsLeft));
+    const intervalId = window.setInterval(() => {
+      setLockoutSeconds((seconds) => Math.max(0, seconds - 1));
+    }, 1000);
+
+    return () => window.clearInterval(intervalId);
+  }, [isLocked, secured.isPermanentlyBanned, secured.secondsLeft]);
 
   // Restore lockout from server on mount and when email field loses focus
   // (handles page refresh while locked — server is the source of truth)
@@ -64,6 +76,10 @@ export default function Login() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -83,6 +99,19 @@ export default function Login() {
     setSubmitting(true);
 
     try {
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('email', sanitizedEmail)
+        .maybeSingle();
+
+      if (profileError) throw profileError;
+
+      if (profile?.role?.toLowerCase() === 'enforcer') {
+        setError(GENERIC_AUTH_ERROR);
+        return;
+      }
+
       // ── Delegate to server-side rate limiter Edge Function ──
       const result = await secured.retry(sanitizedEmail, password);
 
@@ -90,10 +119,11 @@ export default function Login() {
         // ── Successful login — restore Supabase session from Edge Function ──
         // The Edge Function authenticated on its own client, so we need to
         // set the session on the local Supabase client for AuthContext to work.
-        await supabase.auth.setSession({
+        const { error: sessionError } = await supabase.auth.setSession({
           access_token: result.session.accessToken,
           refresh_token: result.session.refreshToken || "",
         });
+        if (sessionError) throw sessionError;
 
         // Now the local Supabase client has a valid session.
         // Let AuthContext pick it up by navigating.
@@ -111,67 +141,67 @@ export default function Login() {
   };
 
   return (
-    <div className="w-full h-screen flex justify-center items-center bg-[#0F2744]">
+    <div className="flex min-h-screen w-full items-center justify-center bg-slate-900 px-4">
       {/* Original Card Layout - Reverted to Previous Design */}
-      <div className="w-full max-w-[400px] bg-white p-8 rounded-lg shadow-md">
-        {/* Lockout Overlay - Shown when locked, but maintains original layout underneath */}
-        {isLocked && (
-          <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-white/90 backdrop-blur-sm">
-            <div className="space-y-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-50">
-                <ExclamationTriangleIcon className="h-6 w-6 text-red-500" />
-              </div>
-
-              {secured.isPermanentlyBanned ? (
-                <>
-                  <p className="text-xl font-bold text-red-600 mb-2">
-                    Device Permanently Locked
-                  </p>
-                  <p className="text-sm text-red-600">
-                    This device has been permanently locked due to excessive failed login attempts.
-                  </p>
-                </>
-              ) : (
-                <>
-                  <p className="text-xl font-bold text-red-600 mb-2">
-                    Login Temporarily Suspended
-                  </p>
-                  <p className="text-sm text-red-600">
-                    Too many consecutive failed login attempts. Further attempts blocked for:
-                  </p>
-                  <span className="bg-red-100 text-red-600 px-3 py-1 rounded text-sm font-mono">
-                    {secured.formatted}
-                  </span>
-                </>
-              )}
-
-              {secured.tier > 0 && (
-                <p className="text-sm text-red-600">
-                  Security Level {secured.tier}/5
-                </p>
-              )}
-
-              <p className="text-xs text-red-600">
-                Please wait or contact administrator
-              </p>
-            </div>
-          </div>
-        )}
-
+      <div className="w-full max-w-[400px] rounded-lg bg-white p-8 shadow-xl">
         <div className="relative">
-          <div className="flex justify-center mb-4">
-            <img src={Logo} alt="Logo" className="w-[100px] h-[100px]" />
+          <div className="mb-8 flex translate-y-1 items-center justify-center gap-3">
+            <div className="w-[180px] shrink-0">
+              <h2 className="text-right text-4xl font-black tracking-tight" style={{ fontFamily: '"TT Hoves", sans-serif' }}>
+                <span className="italic text-orange-500">CAM</span>
+                <span className="ml-[3px] text-[#243c56]">OTE</span>
+              </h2>
+              <div className="mt-2 ml-auto flex w-[88%] flex-col items-end gap-1" aria-hidden="true">
+                <span className="h-1.5 w-[105px] bg-[#243c56]" />
+                <span className="h-1.5 w-[67px] bg-orange-500" />
+              </div>
+            </div>
+            <img src={Logo} alt="CAMOTE road and aperture logo" className="mt-[5px] h-17 w-17 shrink-0 object-contain" />
           </div>
-          <h2 className="text-2xl font-extrabold mb-8 text-center"><span className="text-[#e7600d]">CAM</span><span className="text-[#243c56]">OTE</span></h2>
+          {lockoutActive ? (
+            <section className="flex min-h-[300px] flex-col items-center justify-center rounded-xl px-6 text-center" aria-live="polite">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-200 text-slate-700">
+                <LockClosedIcon className="h-6 w-6" />
+              </div>
+              <h2 className="mt-4 text-xl font-bold text-slate-900">
+                {secured.isPermanentlyBanned ? 'Access Permanently Suspended' : 'Access Temporarily Suspended'}
+              </h2>
+              <p className="mt-2 max-w-xs text-sm leading-6 text-slate-500">
+                {secured.isPermanentlyBanned
+                  ? 'This device has been suspended due to repeated failed sign-in attempts.'
+                  : 'Too many failed sign-in attempts. Please wait for the security timer to expire before trying again.'}
+              </p>
+              {!secured.isPermanentlyBanned && (
+                <div className="mt-5 rounded-xl border border-slate-700 bg-slate-900 px-6 py-3 shadow-inner">
+                  <span className="font-mono text-2xl font-bold tracking-widest text-orange-500">
+                    {String(Math.floor(lockoutSeconds / 60)).padStart(2, '0')}:{String(lockoutSeconds % 60).padStart(2, '0')}
+                  </span>
+                </div>
+              )}
+            </section>
+          ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="-mb-1 flex h-14 items-center gap-2 pl-3" aria-live="polite">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className={cn("size-5 shrink-0 text-red-500", !error && "invisible")}
+                aria-hidden="true"
+              >
+                <path fillRule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003ZM12 8.25a.75.75 0 0 1 .75.75v3.75a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm0 8.25a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z" clipRule="evenodd" />
+              </svg>
+              <p className={cn("text-sm text-red-600", !error && "invisible")}>{error || "Error message placeholder"}</p>
+            </div>
+
             <div className="mb-4 relative">
               <UserIcon
-                className="text-[#7E8998] absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5"
+                  className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
               />
               <input
                 className={cn(
-                  "w-full h-11 bg-[#F0F4F8] border border-[#E2E8F0] rounded-md pl-11 pr-4 text-gray-700 placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#e7600d]/50 focus:border-[#e7600d] shadow-sm",
-                  isLocked && "opacity-50 cursor-not-allowed",
+                    "h-11 w-full rounded-xl border border-slate-200 bg-slate-50/80 pl-11 pr-4 text-sm font-medium tracking-wide text-slate-700 shadow-sm outline-none transition-colors placeholder:font-normal placeholder:text-slate-400 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20",
+                  lockoutActive && "opacity-50 cursor-not-allowed",
                   submitting && "opacity-70"
                 )}
                 id="email"
@@ -183,18 +213,18 @@ export default function Login() {
                   setError("");
                 }}
                 onBlur={handleEmailBlur}
-                disabled={isLocked || submitting}
+                disabled={lockoutActive || submitting}
               />
             </div>
 
             <div className="relative">
               <LockClosedIcon
-                className="text-[#7E8998] absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5"
+                  className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
               />
               <input
                 className={cn(
-                  "w-full h-11 bg-[#F0F4F8] border border-[#E2E8F0] rounded-md pl-11 pr-4 text-gray-700 placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#e7600d]/50 focus:border-[#e7600d] shadow-sm",
-                  isLocked && "opacity-50 cursor-not-allowed",
+                    "h-11 w-full rounded-xl border border-slate-200 bg-slate-50/80 pl-11 pr-4 text-sm font-medium tracking-wide text-slate-700 shadow-sm outline-none transition-colors placeholder:font-normal placeholder:text-slate-400 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20",
+                  lockoutActive && "opacity-50 cursor-not-allowed",
                   submitting && "opacity-70"
                 )}
                 id="password"
@@ -205,12 +235,12 @@ export default function Login() {
                   setPassword(e.target.value);
                   setError("");
                 }}
-                disabled={isLocked || submitting}
+                disabled={lockoutActive || submitting}
               />
               <button type="button"
-                className="absolute right-3 top-1/2 -translate-y-1/2 flex h-5 w-5 items-center justify-center text-gray-600 hover:text-gray-800"
+                className="absolute right-3 top-1/2 flex h-5 w-5 -translate-y-1/2 cursor-pointer items-center justify-center text-slate-400 transition-colors hover:text-slate-700"
                 onClick={() => setShowPassword(!showPassword)}
-                disabled={isLocked || submitting}
+                disabled={lockoutActive || submitting}
               >
                 {showPassword ? (
                   <EyeSlashIcon className="h-5 w-5" cursor="pointer" />
@@ -220,14 +250,7 @@ export default function Login() {
               </button>
             </div>
 
-            {error && (
-              <div className="mt-2 flex items-center space-x-2">
-                <ExclamationTriangleIcon className="h-4 w-4 text-red-500" />
-                <p className="text-sm text-red-600">{error}</p>
-              </div>
-            )}
-
-            <div className="text-right mt-4">
+            <div className="mt-2 text-right">
               <a
                 href="/forgot-password"
                 className="text-sm text-[#0F2744] hover:underline"
@@ -238,12 +261,19 @@ export default function Login() {
 
             <button
               type="submit"
-              className="w-full bg-[#0F2744] text-white py-2 px-4 rounded-md hover:bg-[#0F2744]/90 focus:outline-none focus:ring-2 focus:ring-[#e7600d] focus:ring-opacity-75 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-              disabled={submitting || isLocked}
+              className="mt-6 w-full cursor-pointer rounded-md bg-[#0F2744] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#0F2744]/90 focus:outline-none focus:ring-2 focus:ring-[#e7600d] focus:ring-opacity-75 disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={submitting || lockoutActive}
             >
               {submitting ? 'Signing In...' : 'Sign In'}
             </button>
+            <p className="flex items-center justify-center gap-1 text-xs text-[#8693A6]">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4" aria-hidden="true">
+                <path fillRule="evenodd" d="M12.516 2.17a.75.75 0 0 0-1.032 0 11.209 11.209 0 0 1-7.877 3.08.75.75 0 0 0-.722.515A12.74 12.74 0 0 0 2.25 9.75c0 5.942 4.064 10.933 9.563 12.348a.749.749 0 0 0 .374 0c5.499-1.415 9.563-6.406 9.563-12.348 0-1.39-.223-2.73-.635-3.985a.75.75 0 0 0-.722-.516l-.143.001c-2.996 0-5.717-1.17-7.734-3.08Zm3.094 8.016a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clipRule="evenodd" />
+              </svg>
+              Secured by CAMOTE
+            </p>
           </form>
+          )}
         </div>
       </div>
     </div>
