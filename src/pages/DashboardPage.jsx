@@ -7,13 +7,50 @@ import { IdCardLanyard, Ticket, CircleAlert, Phone, MoveRight } from "lucide-rea
 export default function Dashboard(){
     const [dateRange, setDateRange] =  useState("Last 30 days");
 
+    const enforcers = [
+    {
+        id: 1,
+        name: "San Jose D. Elmonte",
+        location: "Caloocan",
+        battery: 80,
+        isOnline: true,
+    },
+    {
+        id: 2,
+        name: "Arthur Nery",
+        location: "North Caloocan",
+        battery: 92,
+        isOnline: true,
+    },
+    {
+        id: 3,
+        name: "Mark Anthony Santos",
+        location: "Barangay 176",
+        battery: 67,
+        isOnline: true,
+    },
+    {
+        id: 4,
+        name: "John Carlo Reyes",
+        location: "Novaliches",
+        battery: 45,
+        isOnline: true,
+    },
+
+
+
+    ];
+
+    // Calculate total enforcers and active enforcers
+    const totalEnforcers = enforcers.length;
+    const activeEnforcers = enforcers.filter(enforcer => enforcer.isOnline).length;
 
     const data = [
         {
             id: "totalEnforcers",
             title: "Total Enforcers",
-            value: 120,
-            subtitle: "5 active",
+            value: totalEnforcers,
+            subtitle: `${activeEnforcers} active`,
             icon: IdCardLanyard,
             color: '#4560B9'
 
@@ -46,41 +83,6 @@ export default function Dashboard(){
 
         }
     ]
-
-    const enforcers = [
-    {
-        id: 1,
-        name: "San Jose D. Elmonte",
-        location: "Caloocan",
-        battery: 80,
-        isOnline: true,
-    },
-    {
-        id: 2,
-        name: "Arthur Nery",
-        location: "North Caloocan",
-        battery: 92,
-        isOnline: true,
-    },
-    {
-        id: 3,
-        name: "Mark Anthony Santos",
-        location: "Barangay 176",
-        battery: 67,
-        isOnline: true,
-    },
-    {
-        id: 4,
-        name: "John Carlo Reyes",
-        location: "Novaliches",
-        battery: 45,
-        isOnline: true,
-    },
-    
-   
-];
-
-
 
     return(
         <div className='w-full h-full'>
@@ -140,7 +142,7 @@ export default function Dashboard(){
                 </div>
             </div>
 
-           
+
         </div>
     )
 }
