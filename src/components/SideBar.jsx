@@ -7,14 +7,14 @@ import {
   Settings,
   ShieldCheck,
   LogOut,
-  Ticket,
   ChevronLeft,
   ChevronRight,
   Eye,
   IdCard,
+  Ticket,
 } from "lucide-react";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
@@ -68,7 +68,26 @@ const bottomItems = [
 ];
 
 export default function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false);
+  // Initialize collapsed state from localStorage or default to false
+  const [collapsed, setCollapsed] = useState(() => {
+    try {
+      const saved = localStorage.getItem('sidebarCollapsed');
+      return saved !== null ? JSON.parse(saved) : false;
+    } catch (error) {
+      console.warn('Failed to read sidebar state from localStorage:', error);
+      return false;
+    }
+  });
+
+  // Update localStorage whenever collapsed state changes
+  useEffect(() => {
+    try {
+      localStorage.setItem('sidebarCollapsed', JSON.stringify(collapsed));
+    } catch (error) {
+      console.warn('Failed to save sidebar state to localStorage:', error);
+    }
+  }, [collapsed]);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { profile, loading } = useAuth();
 
@@ -131,14 +150,19 @@ export default function Sidebar() {
             </div>
 
             {!collapsed && (
-              <div className="whitespace-nowrap">
-                <h1 className="text-[18px] font-bold">
-                  <span className="text-[#e7600d]">CAM</span><span className="text-[#243c56]">OTE</span>
-                </h1>
-
-                <p className="text-[12px] text-[#F5F7FA]">
+              <div className="flex flex-col">
+                <h2 className="text-2xl font-black tracking-tight leading-none" style={{ fontFamily: '"TT Hoves", sans-serif' }}>
+                  <span className="italic text-orange-500">CAM</span>
+                  <span className="ml-[2px] text-white">OTE</span>
+                </h2>
+                {/* Split Accent Lines */}
+                <div className="mt-1 flex flex-col items-start gap-0.5" aria-hidden="true">
+                  <span className="h-1 w-[48px] bg-white/80 rounded-full" />
+                  <span className="h-1 w-[32px] bg-orange-500 rounded-full" />
+                </div>
+                <span className="mt-1 text-[10px] font-medium tracking-wider text-slate-400 uppercase">
                   North Caloocan
-                </p>
+                </span>
               </div>
             )}
           </div>
