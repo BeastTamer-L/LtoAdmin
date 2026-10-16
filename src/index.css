@@ -1,1 +1,19 @@
 @import "tailwindcss";
+
+.profile-modal-scrollbar {
+	scrollbar-width: thin;
+	scrollbar-color: #cbd5e1 transparent;
+}
+
+.profile-modal-scrollbar::-webkit-scrollbar {
+	width: 6px;
+}
+
+.profile-modal-scrollbar::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.profile-modal-scrollbar::-webkit-scrollbar-thumb {
+	border-radius: 9999px;
+	background-color: #cbd5e1;
+}

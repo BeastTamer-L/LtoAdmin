@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { X } from "lucide-react";
+import { User, Mail, Phone, Cpu, MapPin, HeartPulse, Camera } from "lucide-react";
+import { Button } from "./ui/button";
 
 const emptyFormState = {
     firstName: "",
@@ -12,200 +13,373 @@ const emptyFormState = {
     iotDeviceId: "",
     homeStation: "",
     areaAssignment: "",
+    birthdate: "",
+    avatarPath: "",
+    avatarFile: null,
+    avatarPreview: "",
 };
 
-export default function EnrollEnforcerModal({ 
-    isOpen, 
-    onClose, 
-    action = "enroll", 
-    initialData = null, 
+export default function EnrollmentModal({
+    isOpen,
+    onClose,
+    action = "enroll",
+    initialData = null,
     handleSubmit,
     isSaving = false,
 }) {
     const [formData, setFormData] = useState(emptyFormState);
+    const [isHoveringAvatar, setIsHoveringAvatar] = useState(false);
 
     // Populate form data if in "edit" mode, or reset if in "enroll" mode
     useEffect(() => {
         if (action === "edit" && initialData) {
-            setFormData(initialData);
+            // Set the form data, and if there's an avatarPath, set it as preview too
+            const formDataWithPreview = {
+                ...initialData,
+                avatarPreview: initialData.avatarPreview || initialData.profilePicture || initialData.avatarPath || ""
+            };
+            setFormData(formDataWithPreview);
         } else {
             setFormData(emptyFormState);
         }
     }, [action, initialData, isOpen]);
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
+        const { name, value, type } = e.target;
+        // Handle file inputs separately
+        if (type === 'file') {
+            const file = e.target.files[0];
+            setFormData((prev) => ({
+                ...prev,
+                [name]: file,
+            }));
+            // Create preview URL for image files
+            if (file) {
+                const previewUrl = URL.createObjectURL(file);
+                setFormData((prev) => ({
+                    ...prev,
+                    avatarPreview: previewUrl,
+                }));
+            }
+        } else {
+            setFormData((prev) => ({
+                ...prev,
+                [name]: value,
+            }));
+        }
     };
 
-    const handleFormSubmit = (e) => {
+    const handleAvatarChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            // Validate file type - only PNG and JPG allowed
+            const allowedTypes = ['image/png', 'image/jpeg'];
+            const allowedExtensions = ['.png', '.jpg', '.jpeg'];
+            const fileExtension = file.name.toLowerCase().slice(-4);
+
+            const isValidType = allowedTypes.includes(file.type) ||
+                              allowedExtensions.some(ext => file.name.toLowerCase().endsWith(ext));
+
+            if (!isValidType) {
+                alert("Please upload a PNG or JPG image file only.");
+                e.target.value = '';
+                return;
+            }
+
+            setFormData((prev) => ({
+                ...prev,
+                avatarFile: file,
+                avatarPreview: URL.createObjectURL(file)
+            }));
+        }
+    };
+
+    const handleFormSubmit = async (e) => {
         e.preventDefault();
-        handleSubmit(formData, action);
+        const formDataToSubmit = { ...formData };
+        delete formDataToSubmit.avatarPreview;
+        await handleSubmit(formDataToSubmit, action);
     };
 
     if (!isOpen) return null;
 
     const isEnrollMode = action === "enroll";
+    const modalTitle = isEnrollMode ? "Enroll New Enforcer" : "Edit Enforcer Profile";
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
-            {/* Modal Container */}
-            <div className="relative w-full max-w-[550px] max-h-[95vh] overflow-y-auto border-2 border-[#E2E8F0] bg-white px-5 py-5 shadow-2xl rounded-lg">
-                
-                {/* Close Button */}
-                <button
-                    type="button"
-                    onClick={onClose}
-                    className="absolute right-4 top-3 text-[#8693A6] transition hover:text-[#0F2744]"
-                >
-                    <X size={26} strokeWidth={2.5} />
-                </button>
-
-                {/* Dynamic Header */}
-                <div className="pr-10">
-                    {
-                        action == "enroll" ? (
-                           <div>
-                                <h2 className="text-[16px] font-semibold text-[#010101]">
-                                    Enroll New Enforcer
-                                </h2>
-                                <p className="mt-0.5 text-[11px] text-[#8693A6]">
-                                    Register a new traffic enforcer and assign a CAMOTE body-worn camera device.
-                                </p>
-                           </div>
-                        ) : (
-                            <div className="w-[80px] h-[80px] rounded-full bg-[#010101]">
-
-                            </div>
-                        )
-                    }
-
-
-
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm px-4">
+            {/* Modal Container - mimicking Dialog shell structure */}
+            <div className="relative w-full sm:max-w-2xl max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden bg-white rounded-lg border border-slate-100 shadow-2xl">
+                {/* Header - mimicking DialogHeader */}
+                <div className="px-6 pt-6 pb-2 shrink-0">
+                    <h2 className="text-xl font-semibold text-slate-900">{modalTitle}</h2>
+                    <p className="text-sm text-slate-500 mt-1">
+                        {isEnrollMode
+                            ? "Create a new enforcer record with profile, deployment, and emergency contact details."
+                            : "Update the enforcer profile, device assignment, and emergency contact information."}
+                    </p>
                 </div>
 
-                <Divider />
-
-                <form onSubmit={handleFormSubmit}>
-                    {/* PERSONAL INFORMATION */}
-                    <SectionTitle title="PERSONAL INFORMATION" />
-                    <div className="grid grid-cols-2 gap-x-3 gap-y-4">
-                        <Input label="First Name" required name="firstName" value={formData.firstName} onChange={handleChange} />
-                        <Input label="Middle Name" name="middleName" value={formData.middleName} onChange={handleChange} />
-                        <Input label="Last Name" required name="lastName" value={formData.lastName} onChange={handleChange} />
-                        <SelectInput
-                            label="Rank Designation"
-                            required
-                            name="rank"
-                            value={formData.rank}
-                            onChange={handleChange}
-                            options={["Sector Commander", "Deputized", "Non-deputized", "Volunteer"]}
+                <form onSubmit={handleFormSubmit} className="flex min-h-0 flex-1 flex-col">
+                    {/* Scrollable Content Area */}
+                    <div className="profile-modal-scrollbar min-h-0 flex-1 overflow-y-auto px-6 pb-2">
+                    {/* Centered Profile Photo Upload */}
+                    <div className="mb-8">
+                        <label
+                            htmlFor="avatar-upload"
+                            className="relative w-24 h-24 mx-auto rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden cursor-pointer group"
+                        >
+                            {formData.avatarPreview || formData.avatarPath ? (
+                                <img
+                                    src={formData.avatarPreview || formData.avatarPath}
+                                    alt="Enforcer Avatar"
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                <Camera className="w-6 h-6 text-slate-400" />
+                            )}
+                            {/* Hover Overlay */}
+                            <div className="absolute inset-0 bg-slate-900/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Camera className="w-4 h-4" />
+                            </div>
+                        </label>
+                        <input
+                            id="avatar-upload"
+                            type="file"
+                            accept="image/png,image/jpeg"
+                            className="hidden"
+                            onChange={handleAvatarChange}
                         />
-                        <Input label="Badge Number" required name="badgeNumber" value={formData.badgeNumber} onChange={handleChange} />
+                        <p className="mt-2 text-xs text-slate-500 text-center">
+                            {isEnrollMode
+                                ? "Click the photo to upload. PNG and JPEG (Optional)"
+                                : "Click the photo to upload or update. PNG and JPEG only"}
+                        </p>
                     </div>
 
-                    <Divider />
+                    <div className="space-y-6">
+                        {/* Personal Information */}
+                        <div className="space-y-4">
+                            <h3 className="text-xs font-bold text-slate-500 tracking-wider uppercase flex items-center">
+                                <User className="w-4 h-4 mr-2" /> Personal Information
+                            </h3>
+                            <div className="grid grid-cols-2 gap-4">
+                                {/* First Name */}
+                                <div className="space-y-2">
+                                    <label className="block text-xs font-medium text-slate-600">First Name</label>
+                                    <input
+                                        type="text"
+                                        name="firstName"
+                                        value={formData.firstName || ""}
+                                        onChange={handleChange}
+                                        className="w-full rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 text-sm px-3.5 py-2 focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                                    />
+                                </div>
+                                {/* Middle Name */}
+                                <div className="space-y-2">
+                                    <label className="block text-xs font-medium text-slate-600">Middle Name</label>
+                                    <input
+                                        type="text"
+                                        name="middleName"
+                                        value={formData.middleName || ""}
+                                        onChange={handleChange}
+                                        className="w-full rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 text-sm px-3.5 py-2 focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                                    />
+                                </div>
+                                {/* Last Name */}
+                                <div className="space-y-2">
+                                    <label className="block text-xs font-medium text-slate-600">Last Name</label>
+                                    <input
+                                        type="text"
+                                        name="lastName"
+                                        value={formData.lastName || ""}
+                                        onChange={handleChange}
+                                        className="w-full rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 text-sm px-3.5 py-2 focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                                    />
+                                </div>
+                                {/* Birthdate */}
+                                <div className="space-y-2">
+                                    <label className="block text-xs font-medium text-slate-600">Birthdate</label>
+                                    <input
+                                        type="date"
+                                        name="birthdate"
+                                        value={formData.birthdate || ""}
+                                        onChange={handleChange}
+                                        className="w-full rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 text-sm px-3.5 py-2 focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                                    />
+                                </div>
+                                {/* Rank Designation */}
+                                <div className="space-y-2">
+                                    <label className="block text-xs font-medium text-slate-600">Rank Designation</label>
+                                    <select
+                                        name="rank"
+                                        value={formData.rank || ""}
+                                        onChange={handleChange}
+                                        className="w-full rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 text-sm px-3.5 py-2 focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                                    >
+                                        <option value="">Select designation</option>
+                                        <option value="Sector Commander">Sector Commander</option>
+                                        <option value="Deputized">Deputized</option>
+                                        <option value="Non-deputized">Non-deputized</option>
+                                        <option value="Volunteer">Volunteer</option>
+                                    </select>
+                                </div>
+                                {/* Badge Number */}
+                                <div className="space-y-2">
+                                    <label className="block text-xs font-medium text-slate-600">Badge Number</label>
+                                    <input
+                                        type="text"
+                                        name="badgeNumber"
+                                        value={formData.badgeNumber || ""}
+                                        onChange={handleChange}
+                                        className="w-full rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 text-sm px-3.5 py-2 focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                                    />
+                                </div>
+                            </div>
+                        </div>
 
-                    {/* CONTACT DETAILS */}
-                    <SectionTitle title="CONTACT DETAILS" />
-                    <div className="grid grid-cols-2 gap-x-3 gap-y-4">
-                        <Input label="Email Address" required type="email" name="email" value={formData.email} onChange={handleChange} />
-                        <Input label="Phone Number" name="phone" value={formData.phone} onChange={handleChange} />
-                    </div>
+                        {/* Contact Details */}
+                        <div className="space-y-4">
+                            <h3 className="text-xs font-bold text-slate-500 tracking-wider uppercase flex items-center">
+                                <Mail className="w-4 h-4 mr-2" /> Contact Details
+                            </h3>
+                            <div className="grid grid-cols-2 gap-4">
+                                {/* Email Address */}
+                                <div className="space-y-2">
+                                    <label className="block text-xs font-medium text-slate-600">Email Address</label>
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        value={formData.email || ""}
+                                        onChange={handleChange}
+                                        className="w-full rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 text-sm px-3.5 py-2 focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                                    />
+                                </div>
+                                {/* Phone Number */}
+                                <div className="space-y-2">
+                                    <label className="block text-xs font-medium text-slate-600">Phone Number</label>
+                                    <input
+                                        type="tel"
+                                        name="phone"
+                                        value={formData.phone || ""}
+                                        onChange={handleChange}
+                                        className="w-full rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 text-sm px-3.5 py-2 focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                                    />
+                                </div>
+                            </div>
+                        </div>
 
-                    <Divider />
+                        {/* Device Assignment */}
+                        <div className="space-y-4">
+                            <h3 className="text-xs font-bold text-slate-500 tracking-wider uppercase flex items-center">
+                                <Cpu className="w-4 h-4 mr-2" /> Device Assignment
+                            </h3>
+                            <div className="grid grid-cols-2 gap-4">
+                                {/* IoT Device ID */}
+                                <div className="space-y-2">
+                                    <label className="block text-xs font-medium text-slate-600">IoT Device ID</label>
+                                    <input
+                                        type="text"
+                                        name="iotDeviceId"
+                                        value={formData.iotDeviceId || ""}
+                                        onChange={handleChange}
+                                        className="w-full rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 text-sm px-3.5 py-2 focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                                    />
+                                </div>
+                                {/* Home Station */}
+                                <div className="space-y-2">
+                                    <label className="block text-xs font-medium text-slate-600">Home Station</label>
+                                    <input
+                                        type="text"
+                                        name="homeStation"
+                                        value={formData.homeStation || ""}
+                                        onChange={handleChange}
+                                        className="w-full rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 text-sm px-3.5 py-2 focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                                    />
+                                </div>
+                                {/* Area of Assignment */}
+                                <div className="space-y-2 col-span-2">
+                                    <label className="block text-xs font-medium text-slate-600">Area of Assignment</label>
+                                    <input
+                                        type="text"
+                                        name="areaAssignment"
+                                        value={formData.areaAssignment || ""}
+                                        onChange={handleChange}
+                                        className="w-full rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 text-sm px-3.5 py-2 focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                                    />
+                                </div>
+                            </div>
+                        </div>
 
-                    {/* DEVICE ASSIGNMENT */}
-                    <SectionTitle title="DEVICE ASSIGNMENT" />
-                    <div className="grid grid-cols-2 gap-x-3 gap-y-4">
-                        <Input label="IoT Device ID" required={isEnrollMode} name="iotDeviceId" value={formData.iotDeviceId} onChange={handleChange} />
-                        <Input label="Home Station" required={isEnrollMode} name="homeStation" value={formData.homeStation} onChange={handleChange} />
-                        <div className="col-span-2">
-                            <Input label="Area of Assignment" required={isEnrollMode} name="areaAssignment" value={formData.areaAssignment} onChange={handleChange} />
+                        {/* Emergency Contact */}
+                        <div className="space-y-4">
+                            <h3 className="text-xs font-bold text-slate-500 tracking-wider uppercase flex items-center">
+                                <HeartPulse className="w-4 h-4 mr-2" /> Emergency Contact
+                            </h3>
+                            <div className="grid grid-cols-2 gap-4">
+                                {/* Emergency Contact Name */}
+                                <div className="space-y-2">
+                                    <label className="block text-xs font-medium text-slate-600">Full Name</label>
+                                    <input
+                                        type="text"
+                                        name="emergencyContactName"
+                                        value={formData.emergencyContactName || ""}
+                                        onChange={handleChange}
+                                        className="w-full rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 text-sm px-3.5 py-2 focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                                    />
+                                </div>
+                                {/* Relationship */}
+                                <div className="space-y-2">
+                                    <label className="block text-xs font-medium text-slate-600">Relationship</label>
+                                    <input
+                                        type="text"
+                                        name="emergencyContactRelationship"
+                                        value={formData.emergencyContactRelationship || ""}
+                                        onChange={handleChange}
+                                        className="w-full rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 text-sm px-3.5 py-2 focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                                    />
+                                </div>
+                                {/* Emergency Phone */}
+                                <div className="space-y-2">
+                                    <label className="block text-xs font-medium text-slate-600">Phone Number</label>
+                                    <input
+                                        type="tel"
+                                        name="emergencyContactPhone"
+                                        value={formData.emergencyContactPhone || ""}
+                                        onChange={handleChange}
+                                        className="w-full rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 text-sm px-3.5 py-2 focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
-
-                    {/* Modal Footer Controls */}
-                    <div className="mt-10 flex items-center justify-between">
-                        <div className="flex gap-2">
-                            <button
-                                type="submit"
-                                disabled={isSaving}
-                                className="rounded-[4px] bg-[#0F2744] px-6 py-2.5 text-[12px] font-medium text-white transition hover:bg-[#173A64] active:scale-[0.98]"
-                            >
-                                {isSaving ? "Sending Invitation..." : isEnrollMode ? "Enroll Enforcer" : "Save Changes"}
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() => setFormData(isEnrollMode ? emptyFormState : initialData)}
-                                className="rounded-[4px] bg-[#EDF1F5] px-6 py-2.5 text-[12px] font-medium text-[#202020] transition hover:bg-[#E0E5EA] active:scale-[0.98]"
-                            >
-                                {isEnrollMode ? "Reset" : "Revert"}
-                            </button>
-                        </div>
-
-                        <span className="text-[10px] text-[#8693A6]">
-                            <span className="text-red-500">*</span> required fields
-                        </span>
                     </div>
+
+                    {/* Footer */}
+                        <div className="px-6 py-4 bg-white shrink-0 flex flex-row justify-between gap-3 sm:gap-3">
+                            <Button variant="outline" onClick={onClose} className="min-w-[100px]">
+                                Cancel
+                            </Button>
+                            {isEnrollMode ? (
+                                <Button
+                                    type="submit"
+                                    disabled={isSaving}
+                                    className="bg-[#0F2744] hover:bg-[#173A64] text-white min-w-[140px]"
+                                >
+                                    {isSaving ? "Saving..." : "Register Enforcer"}
+                                </Button>
+                            ) : (
+                                <Button
+                                    type="submit"
+                                    disabled={isSaving}
+                                    className="bg-[#0F2744] hover:bg-[#173A64] text-white min-w-[140px]"
+                                >
+                                    {isSaving ? "Saving..." : "Update Enforcer"}
+                                </Button>
+                            )}
+                        </div>
                 </form>
             </div>
-        </div>
-    );
-}
-
-/* ---------------- Helper Sub-Components ---------------- */
-
-function SectionTitle({ title }) {
-    return <h3 className="mb-3 text-[11px] font-bold text-[#202020] tracking-wider">{title}</h3>;
-}
-
-function Divider() {
-    return <div className="my-5 h-px bg-[#E2E7ED]" />;
-}
-
-function Input({ label, required = false, type = "text", placeholder = "", name, value, onChange }) {
-    return (
-        <div>
-            <label className="mb-1 block text-[11px] font-medium text-[#202020]">
-                {label} {required && <span className="text-red-500">*</span>}
-            </label>
-            <input
-                type={type}
-                name={name}
-                value={value || ""}
-                onChange={onChange}
-                placeholder={placeholder}
-                className="h-[34px] w-full rounded-[4px] border border-[#DCE3EB] bg-[#EFF3F7] px-3 text-[12px] text-[#202020] outline-none transition placeholder:text-[#9AA9BA] focus:border-[#0F2744] focus:ring-1 focus:ring-[#0F2744]/20"
-            />
-        </div>
-    );
-}
-
-function SelectInput({ label, required = false, name, value, onChange, options }) {
-    return (
-        <div>
-            <label className="mb-1 block text-[11px] font-medium text-[#202020]">
-                {label} {required && <span className="text-red-500">*</span>}
-            </label>
-            <select
-                required={required}
-                name={name}
-                value={value || ""}
-                onChange={onChange}
-                className="h-[34px] w-full rounded-[4px] border border-[#DCE3EB] bg-[#EFF3F7] px-3 text-[12px] text-[#202020] outline-none transition focus:border-[#0F2744] focus:ring-1 focus:ring-[#0F2744]/20"
-            >
-                <option value="" disabled>Select designation</option>
-                {options.map((option) => (
-                    <option key={option} value={option}>
-                        {option}
-                    </option>
-                ))}
-            </select>
         </div>
     );
 }

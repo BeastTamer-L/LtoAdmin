@@ -8,6 +8,21 @@ import { toast } from 'sonner';
 import { createEmployeeInviteAndSendEmail, createProfileAccount } from '../lib/userInvites';
 import { supabase } from '../supabaseClient';
 
+const getProfilePhotoPath = (avatarPath) => {
+    if (!avatarPath) return null;
+
+    try {
+        const photoUrl = new URL(avatarPath);
+        const bucketPath = '/profile-photos/';
+        const bucketPathIndex = photoUrl.pathname.indexOf(bucketPath);
+
+        if (bucketPathIndex === -1) return null;
+        return decodeURIComponent(photoUrl.pathname.slice(bucketPathIndex + bucketPath.length));
+    } catch {
+        return avatarPath;
+    }
+};
+
 export default function Enforcers() {
     const [search, setSearch] = useState('')
     
@@ -26,14 +41,31 @@ export default function Enforcers() {
         setLoadingProfiles(true);
         const { data, error } = await supabase
             .from('profiles')
-            .select('id, first_name, middle_name, last_name, email, phone_number, badge_number, position, is_active, last_login_at, created_at')
+            .select('id, first_name, middle_name, last_name, email, phone_number, badge_number, position, is_active, last_login_at, created_at, birthdate, avatar_path')
             .eq('role', 'enforcer')
             .order('created_at', { ascending: false });
 
         if (error) {
             toast.error(`Failed to load enforcers: ${error.message}`);
         } else {
-            setProfiles(data || []);
+            const profilesWithPhotoUrls = await Promise.all((data || []).map(async (profile) => {
+                const photoPath = getProfilePhotoPath(profile.avatar_path);
+                if (!photoPath) return { ...profile, avatar_url: profile.avatar_path };
+
+                const { data: signedPhoto, error: photoError } = await supabase
+                    .storage
+                    .from('profile-photos')
+                    .createSignedUrl(photoPath, 60 * 60);
+
+                if (photoError) {
+                    console.error('Profile photo URL error:', photoError);
+                    return { ...profile, avatar_url: profile.avatar_path };
+                }
+
+                return { ...profile, avatar_url: signedPhoto.signedUrl };
+            }));
+
+            setProfiles(profilesWithPhotoUrls);
         }
         setLoadingProfiles(false);
     };
@@ -69,23 +101,72 @@ export default function Enforcers() {
     const handleSubmit = async (formData, formAction) => {
         setSaving(true);
         try {
-            const profilePayload = {
-                first_name: formData.firstName.trim(),
-                middle_name: formData.middleName.trim() || null,
-                last_name: formData.lastName.trim(),
-                email: formData.email.trim().toLowerCase(),
-                phone_number: formData.phone.trim() || null,
-                badge_number: formData.badgeNumber.trim() || null,
-                position: formData.rank.trim() || null,
-            };
+            let avatarPath = formData.avatarPath || null;
+            let userId = formAction === "edit" ? selectedEnforcer.id : null;
+
+            if (formAction !== "edit") {
+                const profile = await createProfileAccount({
+                    firstName: formData.firstName.trim(),
+                    middleName: formData.middleName.trim() || null,
+                    lastName: formData.lastName.trim(),
+                    email: formData.email.trim().toLowerCase(),
+                    phoneNumber: formData.phone.trim() || null,
+                    badgeNumber: formData.badgeNumber.trim() || null,
+                    position: formData.rank.trim() || null,
+                    role: "enforcer",
+                    birthdate: formData.birthdate || null,
+                });
+
+                userId = profile.id;
+
+                await createEmployeeInviteAndSendEmail({
+                    userId: profile.id,
+                    email: formData.email,
+                    toName: `${formData.firstName} ${formData.lastName}`.trim(),
+                    role: "enforcer",
+                });
+            }
+
+            // Handle avatar upload if file is selected
+            if (formData.avatarFile) {
+                const fileExt = formData.avatarFile.name.split('.').pop();
+                const fileName = `${crypto.randomUUID()}.${fileExt}`;
+
+                const storagePath = `${userId}/${fileName}`;
+                const { error: uploadError } = await supabase
+                    .storage
+                    .from('profile-photos')
+                    .upload(storagePath, formData.avatarFile);
+
+                if (uploadError) throw uploadError;
+
+                avatarPath = storagePath;
+            }
 
             if (formAction === "edit") {
-                const { error } = await supabase
+                const profilePayload = {
+                    first_name: formData.firstName.trim(),
+                    middle_name: formData.middleName.trim() || null,
+                    last_name: formData.lastName.trim(),
+                    email: formData.email.trim().toLowerCase(),
+                    phone_number: formData.phone.trim() || null,
+                    badge_number: formData.badgeNumber.trim() || null,
+                    position: formData.rank.trim() || null,
+                    birthdate: formData.birthdate || null,
+                    avatar_path: avatarPath,
+                };
+
+                const { data: updatedProfile, error } = await supabase
                     .from('profiles')
                     .update(profilePayload)
-                    .eq('id', selectedEnforcer.id);
+                    .eq('id', selectedEnforcer.id)
+                    .select('id')
+                    .maybeSingle();
 
                 if (error) throw error;
+                if (!updatedProfile) {
+                    throw new Error('Profile was not updated. Check the profiles table UPDATE policy.');
+                }
 
                 setIsEnrollModalOpen(false);
                 await loadProfiles();
@@ -93,23 +174,19 @@ export default function Enforcers() {
                 return;
             }
 
-            const profile = await createProfileAccount({
-                firstName: profilePayload.first_name,
-                middleName: profilePayload.middle_name,
-                lastName: profilePayload.last_name,
-                email: profilePayload.email,
-                phoneNumber: profilePayload.phone_number,
-                badgeNumber: profilePayload.badge_number,
-                position: profilePayload.position,
-                role: "enforcer",
-            });
+            if (avatarPath) {
+                const { data: updatedProfile, error } = await supabase
+                    .from('profiles')
+                    .update({ avatar_path: avatarPath })
+                    .eq('id', userId)
+                    .select('id')
+                    .maybeSingle();
 
-            await createEmployeeInviteAndSendEmail({
-                userId: profile.id,
-                email: formData.email,
-                toName: `${formData.firstName} ${formData.lastName}`.trim(),
-                role: "enforcer",
-            });
+                if (error) throw error;
+                if (!updatedProfile) {
+                    throw new Error('Profile photo was uploaded, but the profile was not updated. Check the profiles table UPDATE policy.');
+                }
+            }
 
             setIsEnrollModalOpen(false);
             await loadProfiles();
@@ -219,7 +296,9 @@ export default function Enforcers() {
             assignedArea: '—',
             lastActive: profile.last_login_at ? new Date(profile.last_login_at).toLocaleString() : 'Never',
             email: profile.email,
-            profilePicture: Logo,
+            profilePicture: profile.avatar_url || Logo,
+            birthdate: profile.birthdate,
+            avatarPath: profile.avatar_path,
         }));
 
     return (

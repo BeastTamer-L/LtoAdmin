@@ -86,6 +86,8 @@ export const createProfileAccount = async ({
   badgeNumber,
   position,
   role,
+  birthdate = null,
+  avatarPath = null,
 }) => {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session?.access_token) {
@@ -98,7 +100,18 @@ export const createProfileAccount = async ({
       "Content-Type": "application/json",
       Authorization: `Bearer ${session.access_token}`,
     },
-    body: JSON.stringify({ firstName, middleName, lastName, email, phoneNumber, badgeNumber, position, role }),
+    body: JSON.stringify({
+      firstName,
+      middleName,
+      lastName,
+      email,
+      phoneNumber,
+      badgeNumber,
+      position,
+      role,
+      birthdate,
+      avatarPath
+    }),
   });
 
   let payload = null;
@@ -112,8 +125,6 @@ export const createProfileAccount = async ({
       payload?.error,
       "stage=",
       payload?.stage,
-      "code=",
-      payload?.code,
       "details=",
       payload?.details,
     );
