@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { User, Mail, Phone, Cpu, MapPin, HeartPulse, Camera } from "lucide-react";
 import { Button } from "./ui/button";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "./ui/select";
 
 const emptyFormState = {
     firstName: "",
@@ -225,19 +226,21 @@ export default function EnrollmentModal({
                                 </div>
                                 {/* Rank Designation */}
                                 <div className="space-y-2">
-                                    <label className="block text-xs font-medium text-slate-600">Rank Designation</label>
-                                    <select
-                                        name="rank"
-                                        value={formData.rank || ""}
-                                        onChange={handleChange}
-                                        className="w-full rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 text-sm px-3.5 py-2 focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                                    <label htmlFor="rank-designation" className="block text-xs font-medium text-slate-600">Rank Designation</label>
+                                    <Select
+                                        value={formData.rank || undefined}
+                                        onValueChange={(value) => setFormData((prev) => ({ ...prev, rank: value }))}
                                     >
-                                        <option value="">Select designation</option>
-                                        <option value="Sector Commander">Sector Commander</option>
-                                        <option value="Deputized">Deputized</option>
-                                        <option value="Non-deputized">Non-deputized</option>
-                                        <option value="Volunteer">Volunteer</option>
-                                    </select>
+                                        <SelectTrigger id="rank-designation" className="enforcers-select-trigger h-[38px] w-full rounded-xl px-3.5 py-2 text-sm">
+                                            <SelectValue placeholder="Select designation" />
+                                        </SelectTrigger>
+                                        <SelectContent className="enforcers-select-options select-slide-down bg-white">
+                                            <SelectItem value="sector commander">Sector Commander</SelectItem>
+                                            <SelectItem value="Non-Deputized">Traffic Enforcer I</SelectItem>
+                                            <SelectItem value="Deputized">Traffic Operations Officer</SelectItem>
+                                            <SelectItem value="volunteere">Volunteer</SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                                 {/* Badge Number */}
                                 <div className="space-y-2">

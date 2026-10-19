@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { Search, Funnel, UserRoundPlus, SquarePen, UserX } from "lucide-react";
+import { useEffect, useState, useCallback } from 'react'
+import { Search, UserRoundPlus, SquarePen, UserX } from "lucide-react";
 import Table from '../components/Table'
 import Logo from '../assets/logo.png'
 import EnrollmentModal from '../components/EnrollmentModal'
@@ -7,6 +7,7 @@ import Modal from '../components/Modal'
 import { toast } from 'sonner';
 import { createEmployeeInviteAndSendEmail, createProfileAccount } from '../lib/userInvites';
 import { supabase } from '../supabaseClient';
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '../components/ui/select';
 
 const getProfilePhotoPath = (avatarPath) => {
     if (!avatarPath) return null;
@@ -23,13 +24,21 @@ const getProfilePhotoPath = (avatarPath) => {
     }
 };
 
+const positionLabels = {
+    "sector commander": "Sector Commander",
+    "Non-Deputized": "Traffic Enforcer I",
+    Deputized: "Traffic Operations Officer",
+    volunteere: "Volunteer",
+};
+
 export default function Enforcers() {
     const [search, setSearch] = useState('')
-    
+    const [positionFilter, setPositionFilter] = useState('');
+
     // Modal states
     const [isEnrollModalOpen, setIsEnrollModalOpen] = useState(false);
     const [isDeactivateModalOpen, setIsDeactivateModalOpen] = useState(false);
-    
+
     // Action and target data state
     const [action, setAction] = useState("enroll"); // "enroll" or "edit"
     const [selectedEnforcer, setSelectedEnforcer] = useState(null);
@@ -37,7 +46,7 @@ export default function Enforcers() {
     const [profiles, setProfiles] = useState([]);
     const [loadingProfiles, setLoadingProfiles] = useState(true);
 
-    const loadProfiles = async () => {
+    const loadProfiles = useCallback(async () => {
         setLoadingProfiles(true);
         const { data, error } = await supabase
             .from('profiles')
@@ -68,11 +77,11 @@ export default function Enforcers() {
             setProfiles(profilesWithPhotoUrls);
         }
         setLoadingProfiles(false);
-    };
+    }, []);
 
     useEffect(() => {
         loadProfiles();
-    }, []);
+    }, [loadProfiles]);
 
     // Handlers
     const handleOpenEnroll = () => {
@@ -228,12 +237,14 @@ export default function Enforcers() {
                         <span className="font-semibold text-black block">
                             {row.enforcer}
                         </span>
-                        <span className="font-medium text-gray-800 text-[12px]">
-                            {row.email}
-                        </span>
                     </div>
                 </div>
             )
+        },
+        {
+            key: "rank",
+            label: "Position",
+            render: (row) => positionLabels[row.rank] || '—',
         },
         {
             key: "badgeNo",
@@ -292,7 +303,11 @@ export default function Enforcers() {
         .filter((profile) => {
             const query = search.trim().toLowerCase();
             const name = `${profile.first_name || ''} ${profile.middle_name || ''} ${profile.last_name || ''}`;
-            return !query || `${name} ${profile.email || ''} ${profile.badge_number || ''}`.toLowerCase().includes(query);
+            const matchesSearch = !query || `${name} ${profile.email || ''} ${profile.badge_number || ''}`.toLowerCase().includes(query);
+
+            const matchesPosition = !positionFilter || profile.position === positionFilter;
+
+            return matchesSearch && matchesPosition;
         })
         .map((profile) => ({
             id: profile.id,
@@ -305,7 +320,18 @@ export default function Enforcers() {
             deviceCode: profile.device_code || '',
             homeStation: '',
             areaAssignment: '',
-            enforcer: `${profile.first_name} ${profile.middle_name ? `${profile.middle_name} ` : ''}${profile.last_name}`,
+            enforcer: (() => {
+                const firstName = profile.first_name || '';
+                const initials = firstName
+                    .split(' ')
+                    .filter(part => part.length > 0)
+                    .map(part => part[0])
+                    .join('');
+                if (initials && profile.last_name) {
+                    return `${initials}. ${profile.last_name}`;
+                }
+                return `${profile.first_name} ${profile.middle_name || ''} ${profile.last_name || ''}`.trim();
+            })(),
             badgeNo: profile.badge_number || '—',
             status: profile.is_active ? 'Active' : 'Inactive',
             assignedArea: '—',
@@ -330,10 +356,21 @@ export default function Enforcers() {
                         className="w-[350px] bg-[#F0F4F8] border border-[#E2E8F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ED6704] text-[14px] text-[#475569] pl-[50px] pr-5 py-2"
                     />
 
-                    <button className="py-2 px-5 bg-[#ED6704] text-white rounded-lg ml-2 hover:bg-[#ED6704]/80 transition duration-300 ease-in-out flex items-center font-semibold gap-2 text-[14px]">
-                        <Funnel className="w-4 h-4 text-white" />
-                        Filter
-                    </button>
+                    <Select
+                        value={positionFilter || "all"}
+                        onValueChange={(value) => setPositionFilter(value === "all" ? "" : value)}
+                    >
+                        <SelectTrigger className="enforcers-select-trigger ml-2 h-[38px] w-full rounded-lg px-3 py-2 text-[14px] shadow-none ring-offset-white sm:w-[180px]">
+                            <SelectValue placeholder="All Positions" />
+                        </SelectTrigger>
+                        <SelectContent className="enforcers-select-options select-slide-down bg-white">
+                            <SelectItem value="all">All Positions</SelectItem>
+                            <SelectItem value="sector commander">Sector Commander</SelectItem>
+                            <SelectItem value="Non-Deputized">Traffic Enforcer I</SelectItem>
+                            <SelectItem value="Deputized">Traffic Operations Officer</SelectItem>
+                            <SelectItem value="volunteere">Volunteer</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
 
                 <button 

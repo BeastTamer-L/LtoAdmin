@@ -1,5 +1,58 @@
 @import "tailwindcss";
 
+@keyframes select-slide-down {
+	from {
+		opacity: 0;
+		transform: translateY(-8px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.select-slide-down[data-state="open"] {
+	animation: select-slide-down 160ms ease-out;
+}
+
+.enforcers-select-trigger {
+	cursor: pointer;
+	background-color: #F0F4F8 !important;
+	border-color: #E2E8F0 !important;
+	color: #475569 !important;
+	box-shadow: none !important;
+}
+
+.enforcers-select-trigger:focus,
+.enforcers-select-trigger:focus-visible,
+.enforcers-select-trigger[data-state="open"] {
+	outline: none !important;
+	box-shadow: none !important;
+}
+
+.enforcers-select-options {
+	border: none !important;
+	background-color: #fff !important;
+}
+
+.enforcers-select-options [role="option"]:hover,
+.enforcers-select-options [role="option"]:focus,
+.enforcers-select-options [role="option"][data-highlighted] {
+	background-color: #F0F4F8 !important;
+	color: #475569 !important;
+}
+
+.enforcers-select-options [role="option"] {
+	cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.select-slide-down[data-state="open"] {
+		animation: none;
+	}
+}
+
 .profile-modal-scrollbar {
 	scrollbar-width: thin;
 	scrollbar-color: #cbd5e1 transparent;
