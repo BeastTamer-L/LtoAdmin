@@ -50,16 +50,48 @@ export default function Enforcers() {
         setLoadingProfiles(true);
         const { data, error } = await supabase
             .from('profiles')
-            .select('id, first_name, middle_name, last_name, email, phone_number, badge_number, position, is_active, last_login_at, created_at, birthdate, avatar_path, device_code, buddy_id')
+            .select('id, first_name, middle_name, last_name, email, phone_number, badge_number, position, is_active, last_login_at, created_at, birthdate, avatar_path, device_code, buddy_id, area_of_assignment')
             .eq('role', 'enforcer')
             .order('created_at', { ascending: false });
 
         if (error) {
             toast.error(`Failed to load enforcers: ${error.message}`);
         } else {
+            // Create buddy map with firstName and lastName
+            const buddyMap = new Map((data || []).map((profile) => [
+                profile.id,
+                {
+                    firstName: profile.first_name || '',
+                    lastName: profile.last_name || ''
+                }
+            ]));
+
             const profilesWithPhotoUrls = await Promise.all((data || []).map(async (profile) => {
                 const photoPath = getProfilePhotoPath(profile.avatar_path);
-                if (!photoPath) return { ...profile, avatar_url: profile.avatar_path };
+                let buddyFormattedName = '';
+                if (profile.buddy_id) {
+                    const buddyInfo = buddyMap.get(profile.buddy_id);
+                    if (buddyInfo) {
+                        const firstName = buddyInfo.firstName;
+                        if (firstName) {
+                            const initials = firstName
+                                .split(' ')
+                                .filter(part => part.length > 0)
+                                .map(part => part[0])
+                                .join('');
+                            if (initials && buddyInfo.lastName) {
+                                buddyFormattedName = `${initials}. ${buddyInfo.lastName}`;
+                            } else if (initials) {
+                                buddyFormattedName = `${initials}.`;
+                            } else {
+                                buddyFormattedName = buddyInfo.lastName || '';
+                            }
+                        } else {
+                            buddyFormattedName = buddyInfo.lastName || '';
+                        }
+                    }
+                }
+                if (!photoPath) return { ...profile, avatar_url: profile.avatar_path, buddyFormattedName };
 
                 const { data: signedPhoto, error: photoError } = await supabase
                     .storage
@@ -68,10 +100,14 @@ export default function Enforcers() {
 
                 if (photoError) {
                     console.error('Profile photo URL error:', photoError);
-                    return { ...profile, avatar_url: profile.avatar_path };
+                    return { ...profile, avatar_url: profile.avatar_path, buddyFormattedName };
                 }
 
-                return { ...profile, avatar_url: signedPhoto.signedUrl };
+                return {
+                    ...profile,
+                    avatar_url: signedPhoto.signedUrl,
+                    buddyFormattedName,
+                };
             }));
 
             setProfiles(profilesWithPhotoUrls);
@@ -80,7 +116,10 @@ export default function Enforcers() {
     }, []);
 
     useEffect(() => {
-        loadProfiles();
+        const loadData = async () => {
+            await loadProfiles();
+        };
+        loadData();
     }, [loadProfiles]);
 
     // Handlers
@@ -249,10 +288,6 @@ export default function Enforcers() {
             render: (row) => positionLabels[row.rank] || '—',
         },
         {
-            key: "badgeNo",
-            label: "Badge Number",
-        },
-        {
             key: "status",
             label: "Status",
             render: (row) => (
@@ -269,11 +304,20 @@ export default function Enforcers() {
         },
         {
             key: "assignedArea",
-            label: "Assigned Area",
+            label: "Sector",
         },
         {
-            key: "lastActive",
-            label: "Last Active",
+            key: "buddyFormattedName",
+            label: "Buddy",
+            render: (row) => (
+                <span className="font-bold">
+                    {row.buddyFormattedName || '—'}
+                </span>
+            ),
+        },
+        {
+            key: "deviceCode",
+            label: "Device ID",
         },
         {
             key: "actions",
@@ -321,7 +365,7 @@ export default function Enforcers() {
             phone: profile.phone_number || '',
             deviceCode: profile.device_code || '',
             homeStation: '',
-            areaAssignment: '',
+            assignedArea: profile.area_of_assignment || '',
             enforcer: (() => {
                 const firstName = profile.first_name || '';
                 const initials = firstName
@@ -336,13 +380,13 @@ export default function Enforcers() {
             })(),
             badgeNo: profile.badge_number || '—',
             status: profile.is_active ? 'Active' : 'Inactive',
-            assignedArea: '—',
             lastActive: profile.last_login_at ? new Date(profile.last_login_at).toLocaleString() : 'Never',
             email: profile.email,
             profilePicture: profile.avatar_url || Logo,
             birthdate: profile.birthdate,
             avatarPath: profile.avatar_path,
             buddyId: profile.buddy_id || "",
+            buddyFormattedName: profile.buddyFormattedName || '—',
         }));
 
     return (
