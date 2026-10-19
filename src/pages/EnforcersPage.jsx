@@ -209,6 +209,7 @@ export default function Enforcers() {
                     badge_number: formData.badgeNumber.trim() || null,
                     position: formData.rank.trim() || null,
                     birthdate: formData.birthdate || null,
+                    area_of_assignment: formData.areaAssignment.trim() || null,
                     avatar_path: avatarPath,
                     device_code: deviceCode,
                     buddy_id: formData.buddyId || null,
@@ -365,6 +366,7 @@ export default function Enforcers() {
             phone: profile.phone_number || '',
             deviceCode: profile.device_code || '',
             homeStation: '',
+            areaAssignment: profile.area_of_assignment || '',
             assignedArea: profile.area_of_assignment || '',
             enforcer: (() => {
                 const firstName = profile.first_name || '';

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Check, Search, User, Mail, Phone, Cpu, MapPin, HeartPulse, Camera, UsersRound } from "lucide-react";
+import { Check, Search, User, Mail, Phone, MapPin, HeartPulse, Camera } from "lucide-react";
 import { Button } from "./ui/button";
 import * as Popover from "@radix-ui/react-popover";
 import { Command } from "cmdk";
@@ -299,10 +299,10 @@ export default function EnrollmentModal({
                             </div>
                         </div>
 
-                        {/* Device Assignment */}
+                        {/* Assignment */}
                         <div className="space-y-4">
                             <h3 className="text-xs font-bold text-slate-500 tracking-wider uppercase flex items-center">
-                                <Cpu className="w-4 h-4 mr-2" /> Device Assignment
+                                <MapPin className="w-4 h-4 mr-2" /> Assignment
                             </h3>
                             <div className="grid grid-cols-2 gap-4">
                                 {/* Device Code */}
@@ -349,7 +349,7 @@ export default function EnrollmentModal({
                                     />
                                 </div>
                                 {/* Area of Assignment */}
-                                <div className="space-y-2 col-span-2">
+                                <div className="space-y-2">
                                     <label className="block text-xs font-medium text-slate-600">Area of Assignment</label>
                                     <input
                                         type="text"
@@ -359,14 +359,8 @@ export default function EnrollmentModal({
                                         className="w-full rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 text-sm px-3.5 py-2 focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
                                     />
                                 </div>
-                            </div>
-                        </div>
-
+                            
                         {/* Buddy Assignment */}
-                        <div className="space-y-4">
-                            <h3 className="text-xs font-bold text-slate-500 tracking-wider uppercase flex items-center">
-                                <UsersRound className="w-4 h-4 mr-2" /> Buddy Assignment
-                            </h3>
                             <div className="space-y-2">
                                 <label id="buddy-assignment-label" className="block text-xs font-medium text-slate-600">
                                     Assigned Buddy
@@ -459,6 +453,7 @@ export default function EnrollmentModal({
                                     </Popover.Portal>
                                 </Popover.Root>
                             </div>
+                        </div>
                         </div>
 
                         {/* Emergency Contact */}
