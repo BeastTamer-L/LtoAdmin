@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { Search, UserRoundPlus, SquarePen, UserX } from "lucide-react";
+import { Search, UserRoundPlus, SquarePen, UserX, MapPin } from "lucide-react";
 import Table from '../components/Table'
 import Logo from '../assets/logo.png'
 import EnrollmentModal from '../components/EnrollmentModal'
@@ -140,6 +140,10 @@ export default function Enforcers() {
         setIsDeactivateModalOpen(true);
     };
 
+    const handleCompanionMap = () => {
+        toast.info("Companion Map feature coming soon");
+    };
+
     const confirmDeactivate = () => {
         console.log("Deactivating enforcer:", selectedEnforcer);
         // Insert API call to deactivate here
@@ -253,8 +257,8 @@ export default function Enforcers() {
         } catch (error) {
             const message =
                 error.code === "23505" &&
-                `${error.message || ""} ${error.details || ""}`
-                    .includes("profiles_device_code_unique")
+                    `${error.message || ""} ${error.details || ""}`
+                        .includes("profiles_device_code_unique")
                     ? "This device code is already assigned to another enforcer."
                     : error.message || "Unable to save the enforcer account.";
 
@@ -394,7 +398,7 @@ export default function Enforcers() {
     return (
         <div className='bg-white w-full h-full border-[1px] border-[#E2E8F0] px-6 py-6 rounded-lg'>
             <div className='flex items-center justify-between mb-[60px]'>
-                
+
                 <div className='relative flex items-center'>
                     <Search className="text-[#7E8998] absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" />
                     <input
@@ -422,13 +426,22 @@ export default function Enforcers() {
                     </Select>
                 </div>
 
-                <button 
-                    onClick={handleOpenEnroll}
-                    className="py-2 px-5 bg-[#0F2744] text-white rounded-lg ml-2 hover:bg-[#0F2744]/80 transition duration-300 ease-in-out flex items-center font-semibold gap-4 text-[14px]"
-                >
-                    <UserRoundPlus className="w-4 h-4 text-white" />
-                    Add Enforcer
-                </button>
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={handleCompanionMap}
+                        className="py-2 px-5 bg-[#0F2744] text-white rounded-lg cursor-pointer hover:bg-[#0F2744]/80 transition duration-300 ease-in-out flex items-center font-semibold gap-4 text-[14px]"
+                    >
+                        <MapPin className="w-4 h-4 text-white" />
+                        Companion Map
+                    </button>
+                    <button
+                        onClick={handleOpenEnroll}
+                        className="py-2 px-5 bg-[#0F2744] text-white rounded-lg cursor-pointer hover:bg-[#0F2744]/80 transition duration-300 ease-in-out flex items-center font-semibold gap-4 text-[14px]"
+                    >
+                        <UserRoundPlus className="w-4 h-4 text-white" />
+                        Enroll Enforcer
+                    </button>
+                </div>
 
             </div>
 
@@ -450,7 +463,7 @@ export default function Enforcers() {
             />
 
             {/* Deactivation Confirmation Modal */}
-            <Modal 
+            <Modal
                 isOpen={isDeactivateModalOpen}
                 onClose={() => setIsDeactivateModalOpen(false)}
                 title={`Deactivate ${selectedEnforcer?.enforcer || "Enforcer"}?`}
@@ -458,7 +471,7 @@ export default function Enforcers() {
                 onConfirm={confirmDeactivate}
                 confirmText="Deactivate"
                 cancelText="Cancel"
-                color = "#CC2B2B"
+                color="#CC2B2B"
             />
         </div>
     )
