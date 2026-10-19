@@ -41,7 +41,7 @@ export default function Enforcers() {
         setLoadingProfiles(true);
         const { data, error } = await supabase
             .from('profiles')
-            .select('id, first_name, middle_name, last_name, email, phone_number, badge_number, position, is_active, last_login_at, created_at, birthdate, avatar_path')
+            .select('id, first_name, middle_name, last_name, email, phone_number, badge_number, position, is_active, last_login_at, created_at, birthdate, avatar_path, device_code')
             .eq('role', 'enforcer')
             .order('created_at', { ascending: false });
 
@@ -101,6 +101,12 @@ export default function Enforcers() {
     const handleSubmit = async (formData, formAction) => {
         setSaving(true);
         try {
+            const deviceCode = (formData.deviceCode || "").trim();
+
+            if (!/^[0-9]{4}$/.test(deviceCode)) {
+                throw new Error("Please enter exactly 4 digits for the device code.");
+            }
+
             let avatarPath = formData.avatarPath || null;
             let userId = formAction === "edit" ? selectedEnforcer.id : null;
 
@@ -115,6 +121,7 @@ export default function Enforcers() {
                     position: formData.rank.trim() || null,
                     role: "enforcer",
                     birthdate: formData.birthdate || null,
+                    deviceCode,
                 });
 
                 userId = profile.id;
@@ -154,6 +161,7 @@ export default function Enforcers() {
                     position: formData.rank.trim() || null,
                     birthdate: formData.birthdate || null,
                     avatar_path: avatarPath,
+                    device_code: deviceCode,
                 };
 
                 const { data: updatedProfile, error } = await supabase
@@ -192,7 +200,14 @@ export default function Enforcers() {
             await loadProfiles();
             toast.success("Enforcer account created and activation email sent.");
         } catch (error) {
-            toast.error(error.message || "Unable to create the enforcer account.");
+            const message =
+                error.code === "23505" &&
+                `${error.message || ""} ${error.details || ""}`
+                    .includes("profiles_device_code_unique")
+                    ? "This device code is already assigned to another enforcer."
+                    : error.message || "Unable to save the enforcer account.";
+
+            toast.error(message);
         } finally {
             setSaving(false);
         }
@@ -287,7 +302,7 @@ export default function Enforcers() {
             rank: profile.position || '',
             badgeNumber: profile.badge_number || '',
             phone: profile.phone_number || '',
-            iotDeviceId: '',
+            deviceCode: profile.device_code || '',
             homeStation: '',
             areaAssignment: '',
             enforcer: `${profile.first_name} ${profile.middle_name ? `${profile.middle_name} ` : ''}${profile.last_name}`,

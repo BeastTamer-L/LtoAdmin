@@ -49,6 +49,18 @@ Deno.serve(async (request) => {
     const position = String(body.position || "").trim() || null;
     const allowedRoles = ["superadmin", "admin", "staff", "enforcer"];
     const role = allowedRoles.includes(body.role) ? body.role : "enforcer";
+
+    const deviceCode =
+      role === "enforcer"
+        ? String(body.deviceCode ?? "").trim()
+        : null;
+
+    if (role === "enforcer" && !/^[0-9]{4}$/.test(deviceCode ?? "")) {
+      return json({
+        error: "An enforcer must have a device code containing exactly 4 digits.",
+        stage: "validate-device-code",
+      }, 400);
+    }
     if (!firstName || !lastName || !/^\S+@\S+\.\S+$/.test(email)) {
       return json({ error: "First name, last name, and a valid email are required." }, 400);
     }
@@ -72,6 +84,28 @@ Deno.serve(async (request) => {
         code: "profile_email_exists",
       }, 409);
     }
+
+    if (deviceCode) {
+  const { data: assignedDevice, error: deviceCheckError } = await adminClient
+    .from("profiles")
+    .select("id")
+    .eq("device_code", deviceCode)
+    .maybeSingle();
+
+  if (deviceCheckError) {
+    return json({
+      error: deviceCheckError.message,
+      stage: "check-device-code",
+    }, 400);
+  }
+
+  if (assignedDevice) {
+    return json({
+      error: "This device code is already assigned to another enforcer.",
+      stage: "check-device-code",
+    }, 409);
+  }
+}
 
     const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
       email,
@@ -97,13 +131,14 @@ Deno.serve(async (request) => {
         email,
         phone_number: phoneNumber,
         badge_number: badgeNumber,
+        device_code: deviceCode,
         position,
         role,
         is_active: true,
         account_status: "active",
         created_by: caller.id,
       }, { onConflict: "id" })
-      .select("id, first_name, middle_name, last_name, email, role")
+      .select("id, first_name, middle_name, last_name, email, role, device_code")
       .single();
     if (insertError) {
       console.error("admin-create-user profiles insert failed:", insertError);

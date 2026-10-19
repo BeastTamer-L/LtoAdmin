@@ -10,7 +10,7 @@ const emptyFormState = {
     badgeNumber: "",
     email: "",
     phone: "",
-    iotDeviceId: "",
+    deviceCode: "",
     homeStation: "",
     areaAssignment: "",
     birthdate: "",
@@ -96,8 +96,23 @@ export default function EnrollmentModal({
 
     const handleFormSubmit = async (e) => {
         e.preventDefault();
-        const formDataToSubmit = { ...formData };
+
+        if (isSaving) return;
+
+        const deviceCode = (formData.deviceCode || "").trim();
+
+        if (!/^[0-9]{4}$/.test(deviceCode)) {
+            alert("Please enter exactly 4 digits for the device code.");
+            return;
+        }
+
+        const formDataToSubmit = {
+            ...formData,
+            deviceCode,
+        };
+
         delete formDataToSubmit.avatarPreview;
+
         await handleSubmit(formDataToSubmit, action);
     };
 
@@ -275,16 +290,37 @@ export default function EnrollmentModal({
                                 <Cpu className="w-4 h-4 mr-2" /> Device Assignment
                             </h3>
                             <div className="grid grid-cols-2 gap-4">
-                                {/* IoT Device ID */}
+                                {/* Device Code */}
                                 <div className="space-y-2">
-                                    <label className="block text-xs font-medium text-slate-600">IoT Device ID</label>
+                                    <label className="block text-xs font-medium text-slate-600">
+                                        Device Code
+                                    </label>
                                     <input
                                         type="text"
-                                        name="iotDeviceId"
-                                        value={formData.iotDeviceId || ""}
-                                        onChange={handleChange}
+                                        name="deviceCode"
+                                        value={formData.deviceCode || ""}
+                                        onChange={(e) => {
+                                            const value = e.target.value
+                                                .replace(/[^0-9]/g, "")
+                                                .slice(0, 4);
+
+                                            setFormData((prev) => ({
+                                                ...prev,
+                                                deviceCode: value,
+                                            }));
+                                        }}
+                                        inputMode="numeric"
+                                        maxLength={4}
+                                        pattern="[0-9]{4}"
+                                        title="Enter exactly 4 digits."
+                                        placeholder="e.g. 0012"
+                                        required
+                                        disabled={isSaving}
                                         className="w-full rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 text-sm px-3.5 py-2 focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
                                     />
+                                    <p className="text-xs text-slate-500">
+                                        Enter the code from the CAMote device assigned to this enforcer.
+                                    </p>
                                 </div>
                                 {/* Home Station */}
                                 <div className="space-y-2">
@@ -357,7 +393,13 @@ export default function EnrollmentModal({
 
                     {/* Footer */}
                         <div className="px-6 py-4 bg-white shrink-0 flex flex-row justify-between gap-3 sm:gap-3">
-                            <Button variant="outline" onClick={onClose} className="min-w-[100px]">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={onClose}
+                                disabled={isSaving}
+                                className="min-w-[100px]"
+                            >
                                 Cancel
                             </Button>
                             {isEnrollMode ? (
