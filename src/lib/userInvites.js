@@ -89,6 +89,7 @@ export const createProfileAccount = async ({
   birthdate = null,
   avatarPath = null,
   deviceCode = null,
+  buddyId = null,
 }) => {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session?.access_token) {
@@ -113,6 +114,7 @@ export const createProfileAccount = async ({
       birthdate,
       avatarPath,
       deviceCode,
+      buddyId,
     }),
   });
 

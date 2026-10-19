@@ -49,6 +49,7 @@ Deno.serve(async (request) => {
     const position = String(body.position || "").trim() || null;
     const allowedRoles = ["superadmin", "admin", "staff", "enforcer"];
     const role = allowedRoles.includes(body.role) ? body.role : "enforcer";
+    const buddyId = String(body.buddyId || "").trim() || null;
 
     const deviceCode =
       role === "enforcer"
@@ -63,6 +64,22 @@ Deno.serve(async (request) => {
     }
     if (!firstName || !lastName || !/^\S+@\S+\.\S+$/.test(email)) {
       return json({ error: "First name, last name, and a valid email are required." }, 400);
+    }
+
+    if (buddyId) {
+      const { data: buddy, error: buddyError } = await adminClient
+        .from("profiles")
+        .select("id")
+        .eq("id", buddyId)
+        .eq("role", "enforcer")
+        .maybeSingle();
+
+      if (buddyError) {
+        return json({ error: buddyError.message, stage: "validate-buddy" }, 400);
+      }
+      if (!buddy) {
+        return json({ error: "Buddy assignment must reference an existing enforcer." }, 400);
+      }
     }
 
     const { data: existingProfile, error: existingProfileError } = await adminClient
@@ -132,6 +149,7 @@ Deno.serve(async (request) => {
         phone_number: phoneNumber,
         badge_number: badgeNumber,
         device_code: deviceCode,
+        buddy_id: buddyId,
         position,
         role,
         is_active: true,

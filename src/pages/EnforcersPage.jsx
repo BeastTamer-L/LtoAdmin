@@ -50,7 +50,7 @@ export default function Enforcers() {
         setLoadingProfiles(true);
         const { data, error } = await supabase
             .from('profiles')
-            .select('id, first_name, middle_name, last_name, email, phone_number, badge_number, position, is_active, last_login_at, created_at, birthdate, avatar_path, device_code')
+            .select('id, first_name, middle_name, last_name, email, phone_number, badge_number, position, is_active, last_login_at, created_at, birthdate, avatar_path, device_code, buddy_id')
             .eq('role', 'enforcer')
             .order('created_at', { ascending: false });
 
@@ -131,6 +131,7 @@ export default function Enforcers() {
                     role: "enforcer",
                     birthdate: formData.birthdate || null,
                     deviceCode,
+                    buddyId: formData.buddyId || null,
                 });
 
                 userId = profile.id;
@@ -171,6 +172,7 @@ export default function Enforcers() {
                     birthdate: formData.birthdate || null,
                     avatar_path: avatarPath,
                     device_code: deviceCode,
+                    buddy_id: formData.buddyId || null,
                 };
 
                 const { data: updatedProfile, error } = await supabase
@@ -340,6 +342,7 @@ export default function Enforcers() {
             profilePicture: profile.avatar_url || Logo,
             birthdate: profile.birthdate,
             avatarPath: profile.avatar_path,
+            buddyId: profile.buddy_id || "",
         }));
 
     return (
@@ -395,6 +398,7 @@ export default function Enforcers() {
                 onClose={() => setIsEnrollModalOpen(false)}
                 action={action}
                 initialData={selectedEnforcer}
+                availableEnforcers={profiles}
                 handleSubmit={handleSubmit}
                 isSaving={saving}
             />

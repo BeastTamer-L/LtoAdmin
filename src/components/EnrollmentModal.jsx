@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
-import { User, Mail, Phone, Cpu, MapPin, HeartPulse, Camera } from "lucide-react";
+import { Check, Search, User, Mail, Phone, Cpu, MapPin, HeartPulse, Camera, UsersRound } from "lucide-react";
 import { Button } from "./ui/button";
+import * as Popover from "@radix-ui/react-popover";
+import { Command } from "cmdk";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "./ui/select";
 
 const emptyFormState = {
@@ -12,6 +14,7 @@ const emptyFormState = {
     email: "",
     phone: "",
     deviceCode: "",
+    buddyId: "",
     homeStation: "",
     areaAssignment: "",
     birthdate: "",
@@ -25,11 +28,14 @@ export default function EnrollmentModal({
     onClose,
     action = "enroll",
     initialData = null,
+    availableEnforcers = [],
     handleSubmit,
     isSaving = false,
 }) {
     const [formData, setFormData] = useState(emptyFormState);
     const [isHoveringAvatar, setIsHoveringAvatar] = useState(false);
+    const [buddySearch, setBuddySearch] = useState("");
+    const [isBuddyPickerOpen, setIsBuddyPickerOpen] = useState(false);
 
     // Populate form data if in "edit" mode, or reset if in "enroll" mode
     useEffect(() => {
@@ -121,6 +127,12 @@ export default function EnrollmentModal({
 
     const isEnrollMode = action === "enroll";
     const modalTitle = isEnrollMode ? "Enroll New Enforcer" : "Edit Enforcer Profile";
+    const selectedBuddy = availableEnforcers.find((enforcer) => enforcer.id === formData.buddyId);
+    const selectedBuddyName = selectedBuddy
+        ? [selectedBuddy.first_name, selectedBuddy.middle_name, selectedBuddy.last_name]
+            .filter(Boolean)
+            .join(" ")
+        : "";
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm px-4">
@@ -347,6 +359,105 @@ export default function EnrollmentModal({
                                         className="w-full rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 text-sm px-3.5 py-2 focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
                                     />
                                 </div>
+                            </div>
+                        </div>
+
+                        {/* Buddy Assignment */}
+                        <div className="space-y-4">
+                            <h3 className="text-xs font-bold text-slate-500 tracking-wider uppercase flex items-center">
+                                <UsersRound className="w-4 h-4 mr-2" /> Buddy Assignment
+                            </h3>
+                            <div className="space-y-2">
+                                <label id="buddy-assignment-label" className="block text-xs font-medium text-slate-600">
+                                    Assigned Buddy
+                                </label>
+                                <Popover.Root
+                                    open={isBuddyPickerOpen}
+                                    onOpenChange={(open) => {
+                                        setIsBuddyPickerOpen(open);
+                                        if (!open) setBuddySearch("");
+                                    }}
+                                >
+                                    <Popover.Trigger asChild>
+                                        <button
+                                            id="buddy-assignment"
+                                            type="button"
+                                            disabled={isSaving}
+                                            aria-labelledby="buddy-assignment-label"
+                                            className="enforcers-select-trigger flex h-[38px] w-full items-center justify-between rounded-xl px-3.5 py-2 text-left text-sm disabled:cursor-not-allowed disabled:opacity-50"
+                                        >
+                                            <span className={selectedBuddy ? "truncate" : "truncate text-slate-400"}>
+                                                {selectedBuddyName
+                                                    ? `${selectedBuddyName}${selectedBuddy.badge_number ? ` (${selectedBuddy.badge_number})` : ""}`
+                                                    : "Select an existing enforcer"}
+                                            </span>
+                                            <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                        </button>
+                                    </Popover.Trigger>
+                                    <Popover.Portal>
+                                        <Popover.Content
+                                            align="start"
+                                            sideOffset={4}
+                                            className="enforcers-select-options enforcers-buddy-popover select-slide-down z-[190] p-0"
+                                            style={{ width: "var(--radix-popover-trigger-width)" }}
+                                        >
+                                            <Command className="enforcers-buddy-command" shouldFilter>
+                                                <div className="flex items-center border-b border-[#E2E8F0] px-3">
+                                                    <Search className="mr-2 h-4 w-4 shrink-0 text-slate-400" />
+                                                    <Command.Input
+                                                        autoFocus
+                                                        value={buddySearch}
+                                                        onValueChange={setBuddySearch}
+                                                        placeholder="Search enforcers..."
+                                                        className="h-10 w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
+                                                    />
+                                                </div>
+                                                <Command.List className="max-h-56 overflow-y-auto p-1">
+                                                    <Command.Empty className="px-3 py-5 text-center text-sm text-slate-500">
+                                                        No enforcers found.
+                                                    </Command.Empty>
+                                                    <Command.Item
+                                                        value="no buddy assigned"
+                                                        onSelect={() => {
+                                                            setFormData((prev) => ({ ...prev, buddyId: "" }));
+                                                            setIsBuddyPickerOpen(false);
+                                                        }}
+                                                        className="flex cursor-pointer items-center justify-between rounded-md px-3 py-2 text-sm text-slate-700"
+                                                    >
+                                                        No buddy assigned
+                                                        {!formData.buddyId && <Check className="h-4 w-4" />}
+                                                    </Command.Item>
+                                                    {availableEnforcers
+                                                        .filter((enforcer) => enforcer.id !== initialData?.id)
+                                                        .map((enforcer) => {
+                                                            const name = [enforcer.first_name, enforcer.middle_name, enforcer.last_name]
+                                                                .filter(Boolean)
+                                                                .join(" ");
+                                                            const label = name || enforcer.email || "Enforcer";
+                                                            const displayName = enforcer.badge_number
+                                                                ? `${label} (${enforcer.badge_number})`
+                                                                : label;
+
+                                                            return (
+                                                                <Command.Item
+                                                                    key={enforcer.id}
+                                                                    value={`${label} ${enforcer.badge_number || ""} ${enforcer.email || ""}`}
+                                                                    onSelect={() => {
+                                                                        setFormData((prev) => ({ ...prev, buddyId: enforcer.id }));
+                                                                        setIsBuddyPickerOpen(false);
+                                                                    }}
+                                                                    className="flex cursor-pointer items-center justify-between rounded-md px-3 py-2 text-sm text-slate-700"
+                                                                >
+                                                                    {displayName}
+                                                                    {formData.buddyId === enforcer.id && <Check className="h-4 w-4" />}
+                                                                </Command.Item>
+                                                            );
+                                                        })}
+                                                </Command.List>
+                                            </Command>
+                                        </Popover.Content>
+                                    </Popover.Portal>
+                                </Popover.Root>
                             </div>
                         </div>
 

@@ -47,6 +47,18 @@
 	cursor: pointer;
 }
 
+.enforcers-buddy-popover {
+	border: 1px solid #E2E8F0 !important;
+	border-radius: 0.75rem;
+	box-shadow: 0 8px 24px rgb(15 39 68 / 12%);
+}
+
+.enforcers-buddy-command [cmdk-item]:hover,
+.enforcers-buddy-command [cmdk-item][data-selected="true"] {
+	background-color: #F0F4F8;
+	color: #475569;
+}
+
 @media (prefers-reduced-motion: reduce) {
 	.select-slide-down[data-state="open"] {
 		animation: none;
