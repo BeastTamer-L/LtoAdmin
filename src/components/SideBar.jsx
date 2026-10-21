@@ -12,6 +12,7 @@ import {
   Eye,
   IdCard,
   Ticket,
+  Scale,
 } from "lucide-react";
 
 import { useState, useEffect } from "react";
@@ -37,9 +38,25 @@ const menuItems = [
     path: "/tickets",
   },
   {
+    name: "Violations",
+    icon: FileText,
+    path: "/violations",
+  },
+  
+  {
     name: "Reports",
     icon: FileText,
     path: "/reports",
+  },
+  {
+  name: "Audit Trail",
+  path: "/audit-trail",
+  icon: ShieldCheck,
+  },
+  {
+    name: "Adjudication",
+    icon: Scale,
+    path: "/adjudication",
   },
   {
     name: "Security Monitor",
@@ -276,10 +293,13 @@ export default function Sidebar() {
                   </>
                 )}
               </NavLink>
+              
             );
           })}
         </nav>
       </div>
+      
+      
 
       <div className="px-3">
         {/* Divider */}

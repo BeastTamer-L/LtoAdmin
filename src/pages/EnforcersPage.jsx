@@ -1,5 +1,13 @@
-import { useEffect, useState, useCallback } from 'react'
-import { Search, UserRoundPlus, SquarePen, UserX, MapPin } from "lucide-react";
+import { useEffect, useState, useCallback, useRef } from 'react'
+import { createPortal } from "react-dom";
+import {
+    Search,
+    UserRoundPlus,
+    EllipsisVertical,
+    MapPin,
+    ArrowLeft,
+} from "lucide-react";
+import { useNavigate } from 'react-router-dom'
 import Table from '../components/Table'
 import Logo from '../assets/logo.png'
 import EnrollmentModal from '../components/EnrollmentModal'
@@ -31,13 +39,44 @@ const positionLabels = {
     volunteere: "Volunteer",
 };
 
+const featuredSectors = [
+    "Vicas Sector",
+    "Deparo Sector",
+    "Malaria Sector",
+    "Maligaya Sector",
+    "General luis Sector",
+    "almar Sector",
+    "llano Sector",
+];
+
+const formatEnforcerName = (enforcer) => {
+    const firstName = enforcer.first_name || "";
+    const initials = firstName
+        .split(" ")
+        .filter((part) => part.length > 0)
+        .map((part) => part[0])
+        .join("");
+
+    if (initials && enforcer.last_name) {
+        return `${initials}. ${enforcer.last_name}`;
+    }
+
+    return `${firstName} ${enforcer.middle_name || ""} ${
+        enforcer.last_name || ""
+    }`.trim() || "Enforcer";
+};
+
 export default function Enforcers() {
+    const navigate = useNavigate();
     const [search, setSearch] = useState('')
     const [positionFilter, setPositionFilter] = useState('');
 
     // Modal states
     const [isEnrollModalOpen, setIsEnrollModalOpen] = useState(false);
     const [isDeactivateModalOpen, setIsDeactivateModalOpen] = useState(false);
+    const [actionMenu, setActionMenu] = useState(null);
+    const actionMenuRef = useRef(null);
+    const actionButtonRef = useRef(null);
 
     // Action and target data state
     const [action, setAction] = useState("enroll"); // "enroll" or "edit"
@@ -141,13 +180,70 @@ export default function Enforcers() {
     };
 
     const handleCompanionMap = () => {
-        toast.info("Companion Map feature coming soon");
+        navigate("/enforcers/companion-map");
     };
 
-    const confirmDeactivate = () => {
-        console.log("Deactivating enforcer:", selectedEnforcer);
-        // Insert API call to deactivate here
-        setIsDeactivateModalOpen(false);
+    useEffect(() => {
+        if (!actionMenu) return undefined;
+
+        const closeMenuOnOutsideClick = (event) => {
+            if (
+                !actionMenuRef.current?.contains(event.target) &&
+                !actionButtonRef.current?.contains(event.target)
+            ) {
+                setActionMenu(null);
+            }
+        };
+        const closeMenuOnEscape = (event) => {
+            if (event.key === "Escape") setActionMenu(null);
+        };
+
+        document.addEventListener("pointerdown", closeMenuOnOutsideClick);
+        document.addEventListener("keydown", closeMenuOnEscape);
+        return () => {
+            document.removeEventListener("pointerdown", closeMenuOnOutsideClick);
+            document.removeEventListener("keydown", closeMenuOnEscape);
+        };
+    }, [actionMenu]);
+
+    const openActionMenu = (event, row) => {
+        const bounds = event.currentTarget.getBoundingClientRect();
+        const menuWidth = 190;
+        setActionMenu({
+            row,
+            top: Math.min(bounds.bottom + 4, window.innerHeight - 124),
+            left: Math.max(8, bounds.right - menuWidth),
+        });
+        actionButtonRef.current = event.currentTarget;
+    };
+
+    const confirmDeactivate = async () => {
+        if (!selectedEnforcer) return;
+
+        try {
+            const { data, error } = await supabase
+                .from("profiles")
+                .update({ is_active: false })
+                .eq("id", selectedEnforcer.id)
+                .select("id")
+                .maybeSingle();
+
+            if (error) {
+                toast.error(`Failed to deactivate enforcer: ${error.message}`);
+                return;
+            }
+            if (!data) {
+                toast.error("Enforcer was not deactivated. Check the profiles table UPDATE policy.");
+                return;
+            }
+
+            setIsDeactivateModalOpen(false);
+            setSelectedEnforcer(null);
+            await loadProfiles();
+            toast.success("Enforcer deactivated.");
+        } catch (error) {
+            toast.error(`Failed to deactivate enforcer: ${error.message || "Unexpected error."}`);
+        }
     };
 
     const handleSubmit = async (formData, formAction) => {
@@ -325,29 +421,85 @@ export default function Enforcers() {
             label: "Device ID",
         },
         {
+            key: "battery",
+            label: "Battery",
+            render: () => (
+                <span className="font-semibold text-green-500">80%</span>
+            ),
+        },
+        {
             key: "actions",
-            label: "Actions",
+            label: "More",
             render: (row) => (
-                <div className="flex items-center gap-3">
+                <div>
                     <button
-                        onClick={() => handleEdit(row)}
-                        className="flex items-center gap-2 rounded-md bg-slate-100 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-200 transition"
-                        title="Edit Enforcer"
+                        type="button"
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            if (actionMenu?.row.id === row.id) {
+                                setActionMenu(null);
+                            } else {
+                                openActionMenu(event, row);
+                            }
+                        }}
+                        className="rounded p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+                        aria-label={`More actions for ${row.enforcer}`}
+                        aria-haspopup="menu"
+                        aria-expanded={actionMenu?.row.id === row.id}
                     >
-                        <SquarePen className="w-3.5 h-3.5 text-slate-600" />
-                        Edit
+                        <EllipsisVertical size={18} />
                     </button>
-                    <button
-                        onClick={() => handleDeactivate(row)}
-                        className="flex items-center gap-2 rounded-md bg-red-50 px-2.5 py-1.5 text-xs font-medium text-red-600 hover:bg-red-100 transition"
-                        title="Deactivate Enforcer"
-                    >
-                        <UserX className="w-3.5 h-3.5 text-red-600" />
-                        Deactivate
-                    </button>
+                    {actionMenu?.row.id === row.id &&
+                        createPortal(
+                            <div
+                                ref={actionMenuRef}
+                                role="menu"
+                                className="fixed z-[100] w-[190px] rounded-md bg-[#102D4A] py-1 text-white shadow-lg"
+                                style={{
+                                    top: actionMenu.top,
+                                    left: actionMenu.left,
+                                }}
+                            >
+                                <button
+                                    type="button"
+                                    role="menuitem"
+                                    onClick={() => {
+                                        setActionMenu(null);
+                                        handleEdit(row);
+                                    }}
+                                    className="block w-full px-3 py-2 text-left text-xs hover:bg-white/10"
+                                >
+                                    Edit Enforcer Profile
+                                </button>
+                                <button
+                                    type="button"
+                                    role="menuitem"
+                                    onClick={() => {
+                                        setActionMenu(null);
+                                        handleDeactivate(row);
+                                    }}
+                                    className="block w-full border-t border-white/20 px-3 py-2 text-left text-xs hover:bg-white/10"
+                                >
+                                    Deactivate Enforcer
+                                </button>
+                                <button
+                                    type="button"
+                                    role="menuitem"
+                                    onClick={() => {
+                                        setActionMenu(null);
+                                        toast.info("Delete Enforcer is not available yet.");
+                                    }}
+                                    className="block w-full border-t border-white/20 px-3 py-2 text-left text-xs hover:bg-white/10"
+                                >
+                                    Delete Enforcer
+                                </button>
+                            </div>,
+                            document.body
+                        )}
                 </div>
             )
         }
+
     ];
 
     const data = profiles
@@ -475,4 +627,174 @@ export default function Enforcers() {
             />
         </div>
     )
+}
+
+export function CompanionMap() {
+    const navigate = useNavigate();
+    const [enforcers, setEnforcers] = useState([]);
+    const [selectedSector, setSelectedSector] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const loadEnforcers = async () => {
+            const { data, error } = await supabase
+                .from("profiles")
+                .select(
+                    "id, first_name, middle_name, last_name, position, area_of_assignment, avatar_path"
+                )
+                .eq("role", "enforcer")
+                .eq("is_active", true)
+                .order("first_name");
+
+            if (error) {
+                toast.error(`Failed to load enforcers: ${error.message}`);
+            } else {
+                const profilesWithPhotos = await Promise.all(
+                    (data || []).map(async (enforcer) => {
+                        const photoPath = getProfilePhotoPath(enforcer.avatar_path);
+                        if (!photoPath) {
+                            return {
+                                ...enforcer,
+                                avatar_url: enforcer.avatar_path || Logo,
+                            };
+                        }
+
+                        const { data: signedPhoto, error: photoError } = await supabase
+                            .storage
+                            .from("profile-photos")
+                            .createSignedUrl(photoPath, 60 * 60);
+
+                        if (photoError) {
+                            console.error("Profile photo URL error:", photoError);
+                            return {
+                                ...enforcer,
+                                avatar_url: enforcer.avatar_path || Logo,
+                            };
+                        }
+
+                        return { ...enforcer, avatar_url: signedPhoto.signedUrl };
+                    })
+                );
+
+                setEnforcers(profilesWithPhotos);
+            }
+            setLoading(false);
+        };
+
+        loadEnforcers();
+    }, []);
+
+    const sectors = [
+        ...new Set([
+            ...featuredSectors,
+            ...enforcers
+                .map((enforcer) => enforcer.area_of_assignment)
+                .filter(Boolean),
+        ]),
+    ];
+    const filteredEnforcers = selectedSector
+        ? enforcers.filter(
+            (enforcer) => enforcer.area_of_assignment === selectedSector
+        )
+        : enforcers;
+
+    return (
+        <main className="flex h-full min-h-0 flex-col bg-[#F0F4F8] text-slate-800">
+            <section className="relative min-h-[220px] flex-[3] border-b border-slate-200 bg-slate-100">
+                <button
+                    type="button"
+                    onClick={() => navigate("/enforcers")}
+                    className="absolute left-5 top-5 z-10 inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
+                >
+                    <ArrowLeft size={16} />
+                    Back to Enforcer List
+                </button>
+            </section>
+
+            <section className="min-h-0 flex-[2] overflow-auto bg-[#F0F4F8] px-5 py-4 md:px-6">
+                <div className="flex min-h-[56px] items-center justify-between gap-4 border-b border-slate-300 pb-3">
+                    <div className="shrink-0">
+                        <h2 className="text-base font-semibold">Navigate by Sector</h2>
+                        <p className="text-[10px] uppercase leading-none tracking-wide text-slate-500">
+                            Commander View
+                        </p>
+                    </div>
+                    <div className="flex min-w-0 flex-1 gap-2 overflow-x-auto pb-1 sm:justify-start">
+                        {sectors.map((sector) => (
+                            <button
+                                key={sector}
+                                type="button"
+                                onClick={() =>
+                                    setSelectedSector((current) =>
+                                        current === sector ? null : sector
+                                    )
+                                }
+                                aria-pressed={selectedSector === sector}
+                                className={`shrink-0 rounded-md border px-3 py-2 text-xs transition ${
+                                    selectedSector === sector
+                                        ? "border-[#102D4A] bg-[#102D4A] text-white"
+                                        : "border-slate-300 bg-white text-slate-800 hover:bg-slate-50"
+                                }`}
+                            >
+                                {sector}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="pt-4">
+                    <div className="mb-3">
+                        <h2 className="text-base font-semibold">Traffic Enforcers</h2>
+                        <p className="text-xs text-slate-500">
+                            {loading
+                                ? "Loading enforcers..."
+                                : `${filteredEnforcers.length} ${
+                                    filteredEnforcers.length === 1
+                                        ? "enforcer"
+                                        : "enforcers"
+                                }`}
+                        </p>
+                    </div>
+
+                    {loading ? (
+                        <p className="py-6 text-sm text-slate-500">
+                            Loading enforcers...
+                        </p>
+                    ) : filteredEnforcers.length === 0 ? (
+                        <p className="py-6 text-sm text-slate-500">
+                            No active enforcers found for this sector.
+                        </p>
+                    ) : (
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                            {filteredEnforcers.map((enforcer) => (
+                                <article
+                                    key={enforcer.id}
+                                    className="flex min-w-0 items-center gap-3 rounded-md border border-slate-200 bg-white p-3 shadow-sm"
+                                >
+                                    <img
+                                        src={enforcer.avatar_url}
+                                        alt={formatEnforcerName(enforcer)}
+                                        className="h-10 w-10 shrink-0 rounded-full bg-green-100 object-cover"
+                                    />
+                                    <div className="min-w-0">
+                                        <p className="truncate text-sm font-semibold text-slate-900">
+                                            {formatEnforcerName(enforcer)}
+                                        </p>
+                                        <p className="truncate text-xs font-medium text-green-700">
+                                            {positionLabels[enforcer.position] ||
+                                                enforcer.position ||
+                                                "Traffic Enforcer"}
+                                        </p>
+                                        <p className="truncate text-xs text-slate-500">
+                                            {enforcer.area_of_assignment || "Unassigned sector"}
+                                        </p>
+                                    </div>
+                                </article>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </section>
+        </main>
+    );
 }

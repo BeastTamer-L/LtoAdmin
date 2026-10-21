@@ -5,10 +5,8 @@ import {
   ArrowLeft,
   CarFront,
   UserRound,
-  CalendarDays,
   PlayCircle,
   MapPin,
-  ChevronRight,
 } from "lucide-react";
 
 const drivers = [
@@ -196,9 +194,9 @@ export default function LicenseDatabase() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-800">
+    <div className="flex h-full min-h-0 flex-col bg-slate-100 text-slate-800">
 
-      <main className="p-4 md:p-6">
+      <main className="flex min-h-0 flex-1 flex-col overflow-auto p-4 md:p-6">
         {selectedDriver === null ? (
           <DriverTable
             drivers={filteredDrivers}
@@ -273,7 +271,7 @@ export default function LicenseDatabase() {
 
 function DriverTable({ drivers, search, setSearch, onSelectDriver }) {
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm md:p-6">
+    <section className="flex min-h-full flex-1 flex-col rounded-lg border border-slate-200 bg-white p-4 shadow-sm md:p-6">
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         
       </div>
@@ -291,7 +289,7 @@ function DriverTable({ drivers, search, setSearch, onSelectDriver }) {
         />
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="min-h-0 flex-1 overflow-auto">
         <table className="w-full min-w-[680px] border-collapse text-left">
           <thead>
             <tr className="bg-slate-200 text-xs uppercase tracking-wide text-slate-600">

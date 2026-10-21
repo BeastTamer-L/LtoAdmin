@@ -9,11 +9,17 @@ export default function TopSection() {
     }
 
     if (pathname.startsWith("/enforcers")) {
-      return "Enforcers";
+      return pathname === "/enforcers/companion-map"
+        ? "Enforcers Companion Map"
+        : "Enforcers";
     }
 
     if (pathname.startsWith("/tickets")) {
       return "Tickets";
+    }
+
+    if (pathname.startsWith("/adjudication")) {
+      return "Adjudication";
     }
 
     if (pathname.startsWith("/reports")) {
@@ -27,7 +33,15 @@ export default function TopSection() {
     if (pathname.startsWith("/support")) {
       return "Support Center";
     }
-
+    if (pathname.startsWith("/audit-trail")) {
+      return "Audit Trail";
+    }
+    if (pathname.startsWith("/violations")) {
+      return "Violations";
+    }
+    if (pathname.startsWith("/security")) {
+      return "Security";
+    } 
     return "Dashboard";
   };
 

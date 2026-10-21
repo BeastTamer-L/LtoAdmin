@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import Enforcers from '../pages/EnforcersPage'
+import Enforcers, { CompanionMap } from '../pages/EnforcersPage'
 import Ticket from '../pages/TicketPage'
 import TicketDetails from '../pages/TicketDetails'
 import LoginPage from '../pages/LoginPage'
@@ -11,6 +11,9 @@ import ForgotPasswordPage from '../pages/ForgotPasswordPage'
 import PageLayout from '../layouts/PageLayout'
 import ProtectedRoute from "./ProtectedRoute";
 import LicenseDatabase from "../pages/LicenseDatabase";
+import AuditTrail from "../pages/AuditTrail";
+import Adjudication from "../pages/Adjudication";
+import Violations from "../pages/Violations";
 import '../App.css'
 
 export default function AppRoutes() {
@@ -35,11 +38,19 @@ export default function AppRoutes() {
               path="/enforcers"
               element={<ProtectedRoute allowedRoles={['superadmin', 'admin']} />}>
               <Route index element={<Enforcers />} />
+              <Route path="companion-map" element={<CompanionMap />} />
             </Route>
 
             {/* Ticket viewing - all authenticated roles can view */}
             <Route path="/tickets" element={<Ticket />} />
             <Route path="/tickets/:id" element={<TicketDetails />} />
+
+            {/* Adjudication - admin and superadmin only */}
+            <Route
+              path="/adjudication"
+              element={<ProtectedRoute allowedRoles={['superadmin', 'admin']} />}>
+              <Route index element={<Adjudication />} />
+            </Route>
 
             {/* Reports - admin and superadmin only */}
             <Route
@@ -61,6 +72,21 @@ export default function AppRoutes() {
               element={<ProtectedRoute allowedRoles={['superadmin', 'admin']} />}>
               <Route index element={<LicenseDatabase />} />
             </Route>
+
+            {/* Audit Trail - admin and superadmin only */}
+            <Route
+              path="/audit-trail"
+              element={<ProtectedRoute allowedRoles={['superadmin', 'admin']} />}>
+              <Route index element={<AuditTrail />} />
+            </Route>
+
+            {/* Violations - admin and superadmin only */}
+            <Route
+              path="/violations"
+              element={<ProtectedRoute allowedRoles={['superadmin', 'admin']} />}>
+              <Route index element={<Violations />} />
+            </Route>
+            
 
             {/* Example: Superadmin only route */}
             {/*
