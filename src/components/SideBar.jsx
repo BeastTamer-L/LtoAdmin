@@ -10,6 +10,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Eye,
+  MapPin,
+  Briefcase,
   IdCard,
   Ticket,
   Scale,
@@ -31,6 +33,16 @@ const menuItems = [
     name: "Enforcers",
     icon: UsersRound,
     path: "/enforcers",
+  },
+  {
+    name: "Sectors",
+    icon: MapPin,
+    path: "/sectors",
+  },
+  {
+    name: "Positions",
+    icon: Briefcase,
+    path: "/positions",
   },
   {
     name: "Tickets",

@@ -1,0 +1,18 @@
+-- Migration for sectors table
+-- File: supabase/migrations/20261020000001_create_sectors_table.sql
+-- Create sectors table
+CREATE TABLE IF NOT EXISTS sectors (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL UNIQUE,
+    location TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Migration for positions table
+-- File: supabase/migrations/20261020000002_create_positions_table.sql
+-- Create positions table
+CREATE TABLE IF NOT EXISTS positions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL UNIQUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);

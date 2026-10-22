@@ -11,6 +11,8 @@ import ForgotPasswordPage from '../pages/ForgotPasswordPage'
 import PageLayout from '../layouts/PageLayout'
 import ProtectedRoute from "./ProtectedRoute";
 import LicenseDatabase from "../pages/LicenseDatabase";
+import Sectors from '../pages/SectorsPage';
+import Positions from '../pages/PositionsPage';
 import AuditTrail from "../pages/AuditTrail";
 import Adjudication from "../pages/Adjudication";
 import Violations from "../pages/Violations";
@@ -72,6 +74,12 @@ export default function AppRoutes() {
               element={<ProtectedRoute allowedRoles={['superadmin', 'admin']} />}>
               <Route index element={<LicenseDatabase />} />
             </Route>
+            {/* Sectors management - admin and superadmin only */}
+            <Route
+              path="/sectors"
+              element={<ProtectedRoute allowedRoles={['superadmin', 'admin']} />}>
+              <Route index element={<Sectors />} />
+            </Route>
 
             {/* Audit Trail - admin and superadmin only */}
             <Route
@@ -96,6 +104,12 @@ export default function AppRoutes() {
                 <SystemSettings />
             </Route>
             */}
+            {/* Positions management - admin and superadmin only */}
+            <Route
+              path="/positions"
+              element={<ProtectedRoute allowedRoles={['superadmin', 'admin']} />}>
+              <Route index element={<Positions />} />
+            </Route>
           </Route>
         </Route>
 
