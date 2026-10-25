@@ -1,39 +1,31 @@
 import Logo from "../assets/logo.png";
 
 import {
-  LayoutDashboard,
-  FileText,
   ShieldCheck,
   LogOut,
   ChevronLeft,
-  ChevronRight,
-  Eye,
+  Scale,
   IdCard,
   CarFront,
-  Scale,
 } from "lucide-react";
 
+import { DocumentTextIcon } from "@heroicons/react/24/outline";
 import { useState, useEffect } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
 import LogoutModal from "./LogoutModal";
 
 const menuItems = [
   {
-    name: "Dashboard",
-    icon: LayoutDashboard,
-    path: "/dashboard",
-  },
-  {
     name: "Violations",
-    icon: FileText,
+    icon: DocumentTextIcon,
     path: "/violations",
   },
   {
-  name: "License Database",
-  icon: IdCard,
-  path: "/license-database",
+    name: "License Database",
+    icon: IdCard,
+    path: "/license-database",
   },
   {
     name: "Vehicle Database",
@@ -41,26 +33,20 @@ const menuItems = [
     path: "/vehicle-database",
   },
   {
-  name: "Audit Trail",
-  path: "/audit-trail",
-  icon: ShieldCheck,
+    name: "Audit Trail",
+    path: "/audit-trail",
+    icon: ShieldCheck,
   },
   {
     name: "Adjudication",
     icon: Scale,
     path: "/adjudication",
   },
-  {
-    name: "Security Monitor",
-    icon: Eye,
-    path: "/security",
-  },
-  
- 
 ];
 
 
 export default function Sidebar() {
+  const location = useLocation();
   // Initialize collapsed state from localStorage or default to false
   const [collapsed, setCollapsed] = useState(() => {
     try {
@@ -100,12 +86,13 @@ export default function Sidebar() {
   return (
     <aside
       className={`
+        relative
         h-screen
-        bg-[#102D4A]
+        bg-[#1E3A8A]
         text-white
         flex flex-col
-        border-r border-[#29435F]
-        transition-all duration-300 ease-in-out
+        border-r border-[#34519F]
+        transition-all duration-500 ease-in-out
         shrink-0
         ${collapsed ? "w-[80px]" : "w-[260px]"}
       `}
@@ -115,156 +102,140 @@ export default function Sidebar() {
         className={`
           h-[88px]
           flex items-center
-          border-b border-[#29435F]
-          transition-all duration-300
-          ${collapsed ? "px-3" : "px-5"}
+          border-b border-[#34519F]
+          px-[18px]
         `}
       >
-        <div
-          className={`
-            w-full
-            flex items-center
-            ${collapsed ? "justify-center" : "justify-between"}
-          `}
-        >
-          {/* Logo + Title */}
-          <div
-            className={`
-              flex items-center
-              ${collapsed ? "justify-center" : "gap-4"}
-            `}
-          >
-            <div className="relative w-10 h-10 flex items-center justify-center shrink-0">
-              <img
-                src={Logo}
-                alt="CAMOTE Logo"
-                className="w-full h-full object-contain"
-              />
-            </div>
+        <div className="w-full flex items-center">
+          {/* Logo + brand name: the logo keeps one size and position, the brand text slides and fades with the panel */}
+          <div className="flex items-center">
+            <img
+              src={Logo}
+              alt="CAMOTE road and aperture logo"
+              className="h-10 w-10 shrink-0 object-contain"
+            />
 
-            {!collapsed && (
-              <div className="flex translate-y-1 flex-col">
-                <h2 className="text-2xl font-black tracking-tight leading-none" style={{ fontFamily: '"TT Hoves", sans-serif' }}>
+            <div
+              className={`overflow-hidden transition-all duration-500 ease-in-out ${
+                collapsed ? "ml-0 max-w-0 opacity-0" : "ml-3 max-w-[150px] opacity-100"
+              }`}
+            >
+              <div className="w-[150px]">
+                <h2 className="text-right text-[21px] font-black leading-none tracking-tight" style={{ fontFamily: '"TT Hoves", sans-serif' }}>
                   <span className="italic text-orange-500">CAM</span>
                   <span className="ml-[2px] text-white">OTE</span>
                 </h2>
-                {/* Split Accent Lines */}
-                <div className="mt-1 flex flex-col items-start gap-0.5" aria-hidden="true">
-                  <span className="h-1 w-[48px] bg-white/80 rounded-full" />
-                  <span className="h-1 w-[32px] bg-orange-500 rounded-full" />
+                <div className="mt-1 ml-auto flex w-[88%] flex-col items-end gap-[2px]" aria-hidden="true">
+                  <span className="h-[3px] w-[62px] bg-white" />
+                  <span className="h-[3px] w-[40px] bg-orange-500" />
                 </div>
+                <p className="mt-1.5 whitespace-nowrap text-right text-[9px] font-medium tracking-wide text-slate-300">
+                  A Simulated LTO Environment
+                </p>
               </div>
-            )}
+            </div>
           </div>
-
-          {/* Collapse Button */}
-          <button
-            type="button"
-            onClick={() => setCollapsed(!collapsed)}
-            className={`
-              p-1
-              rounded-full
-              text-[#B4C0CC]
-              hover:text-white
-              hover:bg-[#1A3958]
-              transition-all duration-200
-              ${collapsed ? "hidden" : "block"}
-            `}
-            aria-label="Collapse sidebar"
-          >
-            <ChevronLeft size={19} strokeWidth={1.8} />
-          </button>
         </div>
 
-        {/* Expand Button */}
-        {collapsed && (
-          <button
-            type="button"
-            onClick={() => setCollapsed(false)}
-            className="
-              absolute
-              left-[68px]
-              top-[28px]
-              z-20
-              p-1
-              rounded-full
-              bg-[#102D4A]
-              border border-[#29435F]
-              text-[#B4C0CC]
-              hover:text-white
-              hover:bg-[#1A3958]
-              transition-all duration-200
-            "
-            aria-label="Expand sidebar"
-          >
-            <ChevronRight size={18} strokeWidth={1.8} />
-          </button>
-        )}
+        {/* One toggle that slides and rotates with the sidebar width */}
+        <button
+          type="button"
+          onClick={() => setCollapsed(!collapsed)}
+          className={`
+            absolute
+            z-20
+            flex
+            items-center
+            justify-center
+            rounded-full
+            border
+            p-1
+            cursor-pointer
+            transition-all duration-500 ease-in-out
+            hover:scale-110
+            active:scale-90
+            ${
+              collapsed
+                ? "left-[68px] top-[28px] border-[#F96800] bg-[#F96800] text-white hover:border-[#EE6500] hover:bg-[#EE6500]"
+                : "left-[212px] top-[30px] border-transparent bg-transparent text-[#B4C0CC] hover:bg-[#2A4A9E] hover:text-white"
+            }
+          `}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          <ChevronLeft
+            size={19}
+            strokeWidth={1.8}
+            className={`transition-transform duration-500 ease-in-out ${collapsed ? "rotate-180" : ""}`}
+          />
+        </button>
       </div>
 
       <div
         className={`
           flex-1
           pt-7
-          transition-all duration-300
+          transition-all duration-500
           ${collapsed ? "px-3" : "px-3"}
         `}
       >
-        {/* Main Menu Label */}
-        {!collapsed && (
-          <p className="text-[9px] tracking-[3px] text-[#7F94A9] px-3 mb-4">
-            MAIN MENU
-          </p>
-        )}
-
         <nav className="space-y-1">
           {menuItems.map((item) => {
             const Icon = item.icon;
+            const isItemActive = (isActive) =>
+              item.matchPaths
+                ? item.matchPaths.some((p) => location.pathname === p || location.pathname.startsWith(`${p}/`))
+                : isActive;
 
             return (
               <NavLink
                 key={item.name}
                 to={item.path}
                 title={collapsed ? item.name : undefined}
-                className={({ isActive }) => `
-                  w-full
-                  h-11
-                  rounded-lg
+                className={({ isActive: routeActive }) => {
+                  const isActive = isItemActive(routeActive);
+                  return `
                   flex
+                  w-full
                   items-center
-                  transition-all duration-200
+                  rounded-lg
+                  py-2.5
+                  text-sm
+                  tracking-wide
+                  transition-all duration-500 ease-in-out
                   active:scale-[0.98]
-                  ${
-                    collapsed
-                      ? "justify-center px-0"
-                      : "gap-4 px-3"
-                  }
+                  overflow-hidden
+                  pl-[18px] pr-3
                   ${
                     isActive
-                      ? "bg-white text-[#F96800] font-semibold shadow-sm"
-                      : "text-[#B4C0CC] hover:bg-[#1A3958] hover:text-white font-medium"
+                      ? "bg-white text-[#EE6500] font-bold shadow-sm"
+                      : "text-slate-300 hover:text-white hover:bg-slate-800/50 font-medium"
                   }
-                `}
+                `;
+                }}
               >
-                {({ isActive }) => (
+                {({ isActive: routeActive }) => {
+                  const isActive = isItemActive(routeActive);
+                  return (
                   <>
                     <Icon
-                      size={19}
-                      strokeWidth={1.8}
-                      className={
+                      className={`h-5 w-5 shrink-0 stroke-[1.75] ${
                         isActive
-                          ? "text-[#F96800]"
-                          : "text-[#A8B6C5]"
-                      }
+                          ? "text-[#EE6500]"
+                          : "text-slate-400"
+                      }`}
                     />
 
-                    {!collapsed && (
-                      <span className="whitespace-nowrap">
-                        {item.name}
-                      </span>
-                    )}
+                    {/* Always rendered so the label slides and fades with the panel instead of popping in */}
+                    <span
+                      className={`overflow-hidden whitespace-nowrap transition-all duration-500 ease-in-out ${
+                        collapsed ? "ml-0 max-w-0 opacity-0" : "ml-3 max-w-[170px] opacity-100"
+                      }`}
+                    >
+                      {item.name}
+                    </span>
                   </>
-                )}
+                  );
+                }}
               </NavLink>
               
             );
@@ -276,24 +247,25 @@ export default function Sidebar() {
 
       <div className="px-3">
         {/* Divider */}
-        <div className="border-t border-[#29435F] mb-5" />
+        <div className="border-t border-[#34519F] mb-5" />
 
         <div
           className={`
             mb-3
-            h-[60px]
-            rounded-lg
-            bg-[#294663]
             flex
             items-center
-            transition-all duration-300
-            ${collapsed ? "justify-center px-0" : "px-3 gap-3"}
+            rounded-xl
+            border border-slate-700/50
+            bg-slate-800/40
+            py-3 px-[9px]
+            overflow-hidden
+            transition-all duration-500
           `}
         >
           {/* Avatar */}
           <div
           onClick={() => setCollapsed(false)}
-          className="w-9 h-9 rounded-full bg-[#F96800] flex items-center justify-center shrink-0">
+          className="w-9 h-9 rounded-full bg-[#EE6500] flex items-center justify-center shrink-0">
             {!loading && profile ? (
               <span className="text-xs font-bold text-white">
                 {profile.first_name?.charAt(0) || '?'}{profile.last_name?.charAt(0) || '?'}
@@ -305,13 +277,18 @@ export default function Sidebar() {
 )}
             </div>
 
-          {/* Logout */}
-          {!collapsed && (
+          {/* Logout: keeps its size and sticks to the card's right edge, so it rides along with the panel (the card clips it) while it fades */}
+          <div
+            className={`ml-auto shrink-0 transition-opacity duration-500 ease-in-out ${
+              collapsed ? "pointer-events-none opacity-0" : "opacity-100"
+            }`}
+            aria-hidden={collapsed}
+          >
             <button
               type="button"
               onClick={() => setIsModalOpen(true)}
+              tabIndex={collapsed ? -1 : 0}
               className="
-                ml-auto
                 p-2
                 rounded-full
                 cursor-pointer
@@ -324,7 +301,7 @@ export default function Sidebar() {
                 className="w-5 h-5 text-[#B4C0CC]"
               />
             </button>
-          )}
+          </div>
         </div>
       </div>
 

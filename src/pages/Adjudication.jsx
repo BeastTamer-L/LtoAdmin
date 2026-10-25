@@ -1,11 +1,13 @@
 
 import { useState } from "react";
 import {
-  Search,
   ArrowLeft,
   ArrowRight,
   Play,
 } from "lucide-react";
+import SearchInput from "../components/SearchInput";
+import FilterSelect from "../components/FilterSelect";
+import DatePicker from "../components/DatePicker";
 
 const today = new Date();
 const todayKey = [
@@ -59,7 +61,7 @@ function DetailCard({ title, subtitle, children, className = "" }) {
     <section
       className={`overflow-hidden rounded-md border border-slate-200 bg-white ${className}`}
     >
-      <header className="bg-[#102D4A] px-5 py-4 text-white">
+      <header className="bg-[#1E3A8A] px-5 py-4 text-white">
         <h2 className="text-sm font-bold uppercase">{title}</h2>
         <p className="mt-1 text-xs text-slate-300">{subtitle}</p>
       </header>
@@ -76,7 +78,7 @@ function VideoPlaceholder({ label, className = "" }) {
           <Play size={24} fill="currentColor" />
         </span>
       </div>
-      <p className="mt-2 truncate text-sm font-semibold text-[#102D4A]">
+      <p className="mt-2 truncate text-sm font-semibold text-[#1E3A8A]">
         {label}
       </p>
     </div>
@@ -136,7 +138,7 @@ export default function Adjudication() {
           </button>
 
           <section className="overflow-hidden rounded-md border border-slate-200 bg-white">
-            <header className="bg-[#102D4A] px-5 py-3 text-white">
+            <header className="bg-[#1E3A8A] px-5 py-3 text-white">
               <h2 className="text-sm font-bold uppercase">
                 PTSMD Adjudication Action
               </h2>
@@ -177,7 +179,7 @@ export default function Adjudication() {
                         value={option}
                         checked={resolution === option}
                         onChange={(event) => setResolution(event.target.value)}
-                        className="accent-[#102D4A]"
+                        className="accent-[#1E3A8A]"
                       />
                       {option}
                     </label>
@@ -206,7 +208,7 @@ export default function Adjudication() {
                 }));
                 setRulingMessage("Ruling saved.");
               }}
-              className="rounded-md bg-[#102D4A] px-6 py-3 text-sm font-medium text-white hover:bg-[#1a3b5c]"
+              className="rounded-md bg-[#1E3A8A] px-6 py-3 text-sm font-medium text-white hover:bg-[#2A4A9E]"
             >
               Save Ruling
             </button>
@@ -341,10 +343,10 @@ export default function Adjudication() {
                           className={`max-w-xl border-l-4 px-3 py-2 ${
                             speaker === "Enforcer"
                               ? "border-orange-500"
-                              : "border-[#102D4A]"
+                              : "border-[#1E3A8A]"
                           }`}
                         >
-                          <p className="text-xs font-bold text-[#102D4A]">
+                          <p className="text-xs font-bold text-[#1E3A8A]">
                             {speaker}
                           </p>
                           <div className="flex items-end justify-between gap-3">
@@ -381,64 +383,32 @@ export default function Adjudication() {
       <main className="flex min-h-0 flex-1 p-4 md:p-6">
         <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white p-4 shadow-sm md:p-5">
           {/* Search and filters */}
-          <div className="mb-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-            <div className="relative w-full sm:max-w-md">
-              <Search
-                size={17}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-              />
-
-              <input
-                type="text"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search by plate, driver, violation..."
-                className="w-full rounded-md border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-3 text-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
-              />
+          <div className="mb-7 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="relative flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
+              <SearchInput value={search} onChange={setSearch} placeholder="Search by plate, driver, violation..." />
+              <FilterSelect value={activityFilter} onChange={setActivityFilter} options={activityOptions} aria-label="Filter adjudication by activity" />
+              <DatePicker value={selectedDate} onChange={setSelectedDate} placeholder="Filter by date" triggerClassName="h-[38px] w-[170px] text-[14px]" aria-label="Filter adjudication by date" />
             </div>
-
-            <select
-              value={activityFilter}
-              onChange={(event) =>
-                setActivityFilter(event.target.value)
-              }
-              className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 sm:w-36"
-              aria-label="Filter adjudication by activity"
-            >
-              {activityOptions.map((activity) => (
-                <option key={activity} value={activity}>
-                  {activity}
-                </option>
-              ))}
-            </select>
-
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={(event) => setSelectedDate(event.target.value)}
-              className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 sm:w-auto"
-              aria-label="Filter adjudication by date"
-            />
           </div>
 
           {/* Adjudication table */}
           <div className="min-h-0 flex-1 overflow-auto">
             <table className="w-full min-w-[760px] table-fixed border-collapse text-left">
-              <thead className="bg-[#0F2744]/10">
-                <tr className="border-b-2 border-slate-100 text-xs text-slate-500">
-                  <th className="whitespace-nowrap px-3 py-4 text-sm font-semibold text-slate-700">
+              <thead className="sticky top-0 z-10 bg-[#E7E9EC]">
+                <tr>
+                  <th className="whitespace-nowrap px-3 py-4 text-xs font-semibold uppercase tracking-wide text-gray-500">
                     Timestamp Captured
                   </th>
-                  <th className="whitespace-nowrap px-3 py-4 text-sm font-semibold text-slate-700">
+                  <th className="whitespace-nowrap px-3 py-4 text-xs font-semibold uppercase tracking-wide text-gray-500">
                     Plate #
                   </th>
-                  <th className="whitespace-nowrap px-3 py-4 text-sm font-semibold text-slate-700">
+                  <th className="whitespace-nowrap px-3 py-4 text-xs font-semibold uppercase tracking-wide text-gray-500">
                     Driver
                   </th>
-                  <th className="whitespace-nowrap px-3 py-4 text-sm font-semibold text-slate-700">
+                  <th className="whitespace-nowrap px-3 py-4 text-xs font-semibold uppercase tracking-wide text-gray-500">
                     Violation
                   </th>
-                  <th className="whitespace-nowrap px-3 py-4 text-sm font-semibold text-slate-700">
+                  <th className="whitespace-nowrap px-3 py-4 text-xs font-semibold uppercase tracking-wide text-gray-500">
                     Activity
                   </th>
                 </tr>

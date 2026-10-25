@@ -515,7 +515,7 @@ export default function EnrollmentModal({
                                 <Button
                                     type="submit"
                                     disabled={isSaving}
-                                    className="bg-[#0F2744] hover:bg-[#173A64] text-white min-w-[140px]"
+                                    className="bg-[#1E3A8A] hover:bg-[#2A4A9E] text-white min-w-[140px]"
                                 >
                                     {isSaving ? "Saving..." : "Register Enforcer"}
                                 </Button>
@@ -523,7 +523,7 @@ export default function EnrollmentModal({
                                 <Button
                                     type="submit"
                                     disabled={isSaving}
-                                    className="bg-[#0F2744] hover:bg-[#173A64] text-white min-w-[140px]"
+                                    className="bg-[#1E3A8A] hover:bg-[#2A4A9E] text-white min-w-[140px]"
                                 >
                                     {isSaving ? "Saving..." : "Update Enforcer"}
                                 </Button>

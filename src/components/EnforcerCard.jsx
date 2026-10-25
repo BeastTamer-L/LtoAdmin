@@ -11,7 +11,7 @@ export default function EnforcerCard({
             
             <div className="flex items-center gap-3">
                 {/* picture */}
-                <div className="h-10 w-10 shrink-0 rounded-full bg-[#102B4C] flex items-center justify-center">
+                <div className="h-10 w-10 shrink-0 rounded-full bg-[#1E3A8A] flex items-center justify-center">
                     <img
                         src={image}
                         alt={name}

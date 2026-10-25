@@ -37,7 +37,7 @@ export default function ProtectedRoute({
 
   // If this route should redirect authenticated users away (like login page)
   if (redirectIfAuthenticated && user) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/violations" replace />;
   }
 
   // If no role restrictions, render children

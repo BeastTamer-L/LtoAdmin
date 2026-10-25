@@ -1,13 +1,15 @@
 
 import { useState } from "react";
 import {
-  Search,
   ArrowLeft,
   CarFront,
   UserRound,
   PlayCircle,
   MapPin,
 } from "lucide-react";
+import SearchInput from "../components/SearchInput";
+import FilterSelect from "../components/FilterSelect";
+import DatePicker from "../components/DatePicker";
 
 const drivers = [
   {
@@ -231,40 +233,33 @@ export default function VehicleDatabase() {
         ) : (
           <>
             {/* Search and tab controls */}
-            <div className="mb-5 flex flex-col gap-3 rounded-lg bg-white p-4 shadow-sm lg:flex-row lg:items-center">
-              <div className="relative min-w-0 flex-1">
-                <Search
-                  size={18}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                />
-                <input
+            <div className="mb-5 flex flex-col gap-3 rounded-lg bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+              <div className="relative flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
+                <SearchInput
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={setSearch}
                   placeholder={
                     selectedTab === "Citation History"
                       ? "Search by ticket number or violation..."
                       : "Search by plate number or vehicle..."
                   }
-                  className="w-full rounded-md border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm outline-none focus:border-blue-500"
+                />
+
+                <FilterSelect
+                  value={selectedTab}
+                  onChange={(tab) => {
+                    setSelectedTab(tab);
+                    setSearch("");
+                    setSelectedCitationId(null);
+                  }}
+                  options={["Citation History", "Registered Vehicles"]}
+                  aria-label="Choose records to show"
                 />
               </div>
 
-              <select
-                value={selectedTab}
-                onChange={(e) => {
-                  setSelectedTab(e.target.value);
-                  setSearch("");
-                  setSelectedCitationId(null);
-                }}
-                className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm lg:w-52"
-              >
-                <option value="Citation History">Citation History</option>
-                <option value="Registered Vehicles">Registered Vehicles</option>
-              </select>
-
               <button
                 onClick={backToTable}
-                className="flex items-center justify-center gap-2 rounded-md border border-slate-200 px-4 py-2.5 text-sm hover:bg-slate-50"
+                className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-slate-200 px-4 py-2 text-sm hover:bg-slate-50"
               >
                 <ArrowLeft size={16} />
                 Back to Database
@@ -305,52 +300,24 @@ function VehicleTable({
 }) {
   return (
     <section className="flex min-h-full flex-1 flex-col rounded-lg border border-slate-200 bg-white p-4 shadow-sm md:p-6">
-      <div className="mb-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-        <div className="relative w-full sm:max-w-md">
-          <Search
-            size={17}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-          />
-          <input
-            type="text"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search by plate no...."
-            className="w-full rounded-md border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-3 text-sm outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
-          />
-        </div>
-
-        <select
-          value={statusFilter}
-          onChange={(event) => setStatusFilter(event.target.value)}
-          className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-orange-400 sm:w-36"
-          aria-label="Filter vehicles by status"
-        >
-          <option>All Activity</option>
-          <option>Valid</option>
-          <option>Expired</option>
-          <option>Suspended</option>
-        </select>
-
-        <input
-          type="date"
-          value={dateFilter}
-          onChange={(event) => setDateFilter(event.target.value)}
-          className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 sm:w-auto"
-          aria-label="Filter vehicles by registration date"
-        />
-      </div>
+      <div className="mb-7 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="relative flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
+              <SearchInput value={search} onChange={setSearch} placeholder="Search by plate no...." />
+              <FilterSelect value={statusFilter} onChange={setStatusFilter} options={["All Activity", "Valid", "Expired", "Suspended"]} aria-label="Filter vehicles by status" />
+              <DatePicker value={dateFilter} onChange={setDateFilter} placeholder="Filter by date" triggerClassName="h-[38px] w-[170px] text-[14px]" aria-label="Filter vehicles by registration date" />
+            </div>
+          </div>
 
       <div className="min-h-0 flex-1 overflow-auto">
         <table className="w-full min-w-[760px] border-collapse text-center">
-          <thead>
-            <tr className="border-b-2 border-slate-100 text-xs text-slate-500">
-              <th className="whitespace-nowrap px-4 py-4 text-left text-sm font-semibold text-slate-700">Plate No.</th>
-              <th className="whitespace-nowrap px-4 py-4 text-sm font-semibold text-slate-700">MV File No.</th>
-              <th className="whitespace-nowrap px-4 py-4 text-sm font-semibold text-slate-700">Make &amp; Model</th>
-              <th className="whitespace-nowrap px-4 py-4 text-sm font-semibold text-slate-700">Year</th>
-              <th className="whitespace-nowrap px-4 py-4 text-sm font-semibold text-slate-700">Classification</th>
-              <th className="whitespace-nowrap px-4 py-4 text-sm font-semibold text-slate-700">Status</th>
+          <thead className="sticky top-0 z-10 bg-[#E7E9EC]">
+            <tr>
+              <th className="whitespace-nowrap px-4 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Plate No.</th>
+              <th className="whitespace-nowrap px-4 py-4 text-xs font-semibold uppercase tracking-wide text-gray-500">MV File No.</th>
+              <th className="whitespace-nowrap px-4 py-4 text-xs font-semibold uppercase tracking-wide text-gray-500">Make &amp; Model</th>
+              <th className="whitespace-nowrap px-4 py-4 text-xs font-semibold uppercase tracking-wide text-gray-500">Year</th>
+              <th className="whitespace-nowrap px-4 py-4 text-xs font-semibold uppercase tracking-wide text-gray-500">Classification</th>
+              <th className="whitespace-nowrap px-4 py-4 text-xs font-semibold uppercase tracking-wide text-gray-500">Status</th>
             </tr>
           </thead>
           <tbody>

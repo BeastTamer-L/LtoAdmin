@@ -68,16 +68,16 @@ export default function ActivateAccountPage() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-900 px-4 py-10">
+    <main className="flex min-h-screen items-center justify-center bg-[#1E3A8A] px-4 py-10">
       <div className="min-h-[500px] w-full max-w-md rounded-lg bg-white p-10 shadow-xl">
         <div className="mb-10 flex items-center justify-center gap-5">
           <div className="w-[190px] shrink-0">
             <h1 className="text-right text-4xl font-black tracking-tight" style={{ fontFamily: '"TT Hoves", sans-serif' }}>
               <span className="italic text-orange-500">CAM</span>
-              <span className="ml-[3px] text-[#243c56]">OTE</span>
+              <span className="ml-[3px] text-[#1E3A8A]">OTE</span>
             </h1>
             <div className="mt-2 ml-auto flex w-[88%] flex-col items-end gap-1" aria-hidden="true">
-              <span className="h-1.5 w-[105px] bg-[#243c56]" />
+              <span className="h-1.5 w-[105px] bg-[#1E3A8A]" />
               <span className="h-1.5 w-[67px] bg-orange-500" />
             </div>
           </div>
@@ -89,9 +89,9 @@ export default function ActivateAccountPage() {
         ) : success ? (
           <div className="space-y-4 text-center">
             <CheckCircle2 className="mx-auto h-12 w-12 text-emerald-600" />
-            <h2 className="text-xl font-semibold text-[#0F2744]">Account activated</h2>
+            <h2 className="text-xl font-semibold text-[#1E3A8A]">Account activated</h2>
             <p className="text-sm text-[#607085]">Your CAMOTE account is ready. You can now sign in.</p>
-            <Link to="/login" className="block rounded-md bg-[#0F2744] px-4 py-3 text-sm font-semibold text-white">Go to Login</Link>
+            <Link to="/login" className="block rounded-md bg-[#1E3A8A] px-4 py-3 text-sm font-semibold text-white">Go to Login</Link>
           </div>
         ) : (
           <form onSubmit={submit} className="space-y-4">
@@ -137,7 +137,7 @@ export default function ActivateAccountPage() {
               </div>
               <p className="min-h-5 text-xs text-red-600">{confirmPasswordError}</p>
             </div>
-            <button disabled={submitting || !invite || !passwordIsValid || password !== confirmPassword} type="submit" className="mt-6 w-full cursor-pointer rounded-md bg-[#0F2744] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#0F2744]/90 focus:outline-none focus:ring-2 focus:ring-[#e7600d] focus:ring-opacity-75 disabled:cursor-not-allowed disabled:opacity-60">
+            <button disabled={submitting || !invite || !passwordIsValid || password !== confirmPassword} type="submit" className="mt-6 w-full cursor-pointer rounded-md bg-[#1E3A8A] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#1E3A8A]/90 focus:outline-none focus:ring-2 focus:ring-[#e7600d] focus:ring-opacity-75 disabled:cursor-not-allowed disabled:opacity-60">
               {submitting ? "Activating..." : "Activate Account"}
             </button>
             <p className="flex items-center justify-center gap-1 text-xs text-[#8693A6]">

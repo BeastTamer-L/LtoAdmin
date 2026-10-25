@@ -159,16 +159,16 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-900 px-4 py-10">
+    <main className="flex min-h-screen items-center justify-center bg-[#1E3A8A] px-4 py-10">
       <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl sm:p-10">
         <div className="mb-8 flex items-center justify-center gap-4">
           <div className="w-[190px] shrink-0">
             <h1 className="text-right text-4xl font-black tracking-tight" style={{ fontFamily: '"TT Hoves", sans-serif' }}>
               <span className="italic text-orange-500">CAM</span>
-              <span className="ml-[3px] text-[#243c56]">OTE</span>
+              <span className="ml-[3px] text-[#1E3A8A]">OTE</span>
             </h1>
             <div className="mt-2 ml-auto flex w-[88%] flex-col items-end gap-1" aria-hidden="true">
-              <span className="h-1.5 w-[105px] bg-[#243c56]" />
+              <span className="h-1.5 w-[105px] bg-[#1E3A8A]" />
               <span className="h-1.5 w-[67px] bg-orange-500" />
             </div>
           </div>
@@ -189,8 +189,8 @@ export default function ForgotPasswordPage() {
               <input aria-label="Email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Email" className={`${inputClassName} pl-11`} required />
             </div>
             {error && <p className="text-sm text-red-600" role="alert">{error}</p>}
-            <button type="submit" disabled={submitting} className="w-full cursor-pointer rounded-md bg-[#0F2744] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#0F2744]/90 disabled:cursor-not-allowed disabled:opacity-60">{submitting ? "Sending..." : "Send Verification Code"}</button>
-            <Link to="/login" className="flex items-center justify-center gap-2 text-sm text-[#243c56] hover:text-orange-500"><ArrowLeft className="h-4 w-4" /> Back to Sign In</Link>
+            <button type="submit" disabled={submitting} className="w-full cursor-pointer rounded-md bg-[#1E3A8A] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#1E3A8A]/90 disabled:cursor-not-allowed disabled:opacity-60">{submitting ? "Sending..." : "Send Verification Code"}</button>
+            <Link to="/login" className="flex items-center justify-center gap-2 text-sm text-[#1E3A8A] hover:text-orange-500"><ArrowLeft className="h-4 w-4" /> Back to Sign In</Link>
           </form>
         )}
 
@@ -217,9 +217,9 @@ export default function ForgotPasswordPage() {
               ))}
             </div>
             {error && <p className="text-sm text-red-600" role="alert">{error}</p>}
-            <button type="submit" disabled={submitting} className="w-full cursor-pointer rounded-md bg-[#0F2744] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#0F2744]/90 disabled:cursor-not-allowed disabled:opacity-60">Verify Code</button>
+            <button type="submit" disabled={submitting} className="w-full cursor-pointer rounded-md bg-[#1E3A8A] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#1E3A8A]/90 disabled:cursor-not-allowed disabled:opacity-60">Verify Code</button>
             <div className="flex items-center justify-between text-sm">
-              <button type="button" onClick={resendCode} disabled={resendSeconds > 0 || submitting} className="cursor-pointer text-[#243c56] hover:text-orange-500 disabled:cursor-not-allowed disabled:text-slate-400">{resendSeconds > 0 ? `Resend in ${resendSeconds}s` : "Resend Code"}</button>
+              <button type="button" onClick={resendCode} disabled={resendSeconds > 0 || submitting} className="cursor-pointer text-[#1E3A8A] hover:text-orange-500 disabled:cursor-not-allowed disabled:text-slate-400">{resendSeconds > 0 ? `Resend in ${resendSeconds}s` : "Resend Code"}</button>
               <button type="button" onClick={resetToEmail} className="cursor-pointer text-slate-500 hover:text-slate-800">Change Email</button>
             </div>
           </form>
@@ -251,7 +251,7 @@ export default function ForgotPasswordPage() {
             </div>
             <p className="min-h-5 text-sm text-red-600">{confirmPassword && confirmPassword !== password ? "Passwords do not match." : ""}</p>
             {error && <p className="text-sm text-red-600" role="alert">{error}</p>}
-            <button type="submit" disabled={submitting || !passwordIsValid || password !== confirmPassword} className="w-full cursor-pointer rounded-md bg-[#0F2744] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#0F2744]/90 disabled:cursor-not-allowed disabled:opacity-60">{submitting ? "Resetting..." : "Reset Password"}</button>
+            <button type="submit" disabled={submitting || !passwordIsValid || password !== confirmPassword} className="w-full cursor-pointer rounded-md bg-[#1E3A8A] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#1E3A8A]/90 disabled:cursor-not-allowed disabled:opacity-60">{submitting ? "Resetting..." : "Reset Password"}</button>
           </form>
         )}
 
@@ -260,7 +260,7 @@ export default function ForgotPasswordPage() {
             <CheckCircle2 className="mx-auto h-12 w-12 text-emerald-600" />
             <h2 className="text-2xl font-bold text-slate-900">Password Reset Complete</h2>
             <p className="text-sm leading-6 text-slate-500">Your password has been successfully updated. You can now sign in with your new credentials.</p>
-            <Link to="/login" className="block w-full rounded-md bg-[#0F2744] px-4 py-3 text-sm font-semibold text-white hover:bg-[#0F2744]/90">Return to Sign In</Link>
+            <Link to="/login" className="block w-full rounded-md bg-[#1E3A8A] px-4 py-3 text-sm font-semibold text-white hover:bg-[#1E3A8A]/90">Return to Sign In</Link>
           </div>
         )}
 

@@ -1,3 +1,5 @@
+import { Button } from "./ui/button";
+
 export default function Modal({
   isOpen,
   onClose,
@@ -7,7 +9,8 @@ export default function Modal({
   onConfirm,
   confirmText = "Confirm",
   cancelText = "Cancel",
-  color = "#CC2B2B"
+  color = "#CC2B2B",
+  loading = false
 }) {
   if (!isOpen) return null;
 
@@ -17,7 +20,7 @@ export default function Modal({
         {/* Header */}
         <div className="flex items-start justify-between">
           <div>
-            <h2 className="text-[16px] font-semibold text-[#0F2744]">
+            <h2 className="text-[16px] font-semibold text-[#1E3A8A]">
               {title}
             </h2>
 
@@ -31,17 +34,21 @@ export default function Modal({
 
       
 
-        {/* Footer */}
-        <div className="flex justify-end gap-3">
-          <button onClick={onClose} className="rounded-lg border border-[#8693A6] bg-[#F0F4F8] px-5 py-2 text-[14px] font-medium text-slate-600 transition hover:cursor-pointer"
-          >
+        {/* Footer: same Cancel / confirm buttons as the other modals */}
+        <div className="flex flex-row justify-between gap-3">
+          <Button type="button" variant="outline" onClick={onClose} disabled={loading} className="min-w-[100px] text-slate-700">
             {cancelText}
-          </button>
+          </Button>
 
-          <button onClick={onConfirm} className="rounded-lg px-5 py-2 text-[14px] font-medium text-white transition hover:cursor-pointer" style={{backgroundColor: `${color}`}} 
+          <Button
+            type="button"
+            onClick={onConfirm}
+            loading={loading}
+            className="min-w-[140px] text-white hover:brightness-110"
+            style={{ backgroundColor: color }}
           >
             {confirmText}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

@@ -5,7 +5,7 @@ return (
     <div className="w-full overflow-hidden bg-white">
       <div className="overflow-x-auto">
         <table className="w-full text-left">
-          <thead className="bg-[#0F2744]/10 ">
+          <thead className="sticky top-0 z-10 bg-[#E7E9EC]">
             <tr>
               {columns.map((column) => (
                 <th

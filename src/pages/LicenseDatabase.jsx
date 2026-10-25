@@ -1,7 +1,6 @@
 
 import { useState } from "react";
 import {
-  Search,
   ArrowLeft,
   CarFront,
   UserRound,
@@ -9,6 +8,9 @@ import {
   MapPin,
   MoreVertical,
 } from "lucide-react";
+import SearchInput from "../components/SearchInput";
+import FilterSelect from "../components/FilterSelect";
+import DatePicker from "../components/DatePicker";
 
 const drivers = [
   {
@@ -246,40 +248,33 @@ export default function LicenseDatabase() {
         ) : (
           <>
             {/* Search and tab controls */}
-            <div className="mb-5 flex flex-col gap-3 rounded-lg bg-white p-4 shadow-sm lg:flex-row lg:items-center">
-              <div className="relative min-w-0 flex-1">
-                <Search
-                  size={18}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                />
-                <input
+            <div className="mb-5 flex flex-col gap-3 rounded-lg bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+              <div className="relative flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
+                <SearchInput
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={setSearch}
                   placeholder={
                     selectedTab === "Citation History"
                       ? "Search by ticket number or violation..."
                       : "Search by plate number or vehicle..."
                   }
-                  className="w-full rounded-md border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm outline-none focus:border-blue-500"
+                />
+
+                <FilterSelect
+                  value={selectedTab}
+                  onChange={(tab) => {
+                    setSelectedTab(tab);
+                    setSearch("");
+                    setSelectedCitationId(null);
+                  }}
+                  options={["Citation History", "Registered Vehicles"]}
+                  aria-label="Choose records to show"
                 />
               </div>
 
-              <select
-                value={selectedTab}
-                onChange={(e) => {
-                  setSelectedTab(e.target.value);
-                  setSearch("");
-                  setSelectedCitationId(null);
-                }}
-                className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm lg:w-52"
-              >
-                <option value="Citation History">Citation History</option>
-                <option value="Registered Vehicles">Registered Vehicles</option>
-              </select>
-
               <button
                 onClick={backToTable}
-                className="flex items-center justify-center gap-2 rounded-md border border-slate-200 px-4 py-2.5 text-sm hover:bg-slate-50"
+                className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-slate-200 px-4 py-2 text-sm hover:bg-slate-50"
               >
                 <ArrowLeft size={16} />
                 Back to Database
@@ -320,52 +315,24 @@ function DriverTable({
 }) {
   return (
     <section className="flex min-h-full flex-1 flex-col rounded-lg border border-slate-200 bg-white p-4 shadow-sm md:p-6">
-      <div className="mb-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-        <div className="relative w-full sm:max-w-md">
-          <Search
-            size={17}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-          />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by license no..."
-            className="w-full rounded-md border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-3 text-sm outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
-          />
-        </div>
-
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          aria-label="Filter by license status"
-          className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-orange-400 sm:w-36"
-        >
-          <option>All</option>
-          <option>Active</option>
-          <option>Expired</option>
-          <option>Suspended</option>
-        </select>
-
-        <input
-          type="date"
-          value={expiryFilter}
-          onChange={(e) => setExpiryFilter(e.target.value)}
-          className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 sm:w-auto"
-          aria-label="Filter license records by expiry date"
-        />
-      </div>
+      <div className="mb-7 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="relative flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
+              <SearchInput value={search} onChange={setSearch} placeholder="Search by license no..." />
+              <FilterSelect value={statusFilter} onChange={setStatusFilter} options={["All", "Active", "Expired", "Suspended"]} aria-label="Filter by license status" />
+              <DatePicker value={expiryFilter} onChange={setExpiryFilter} placeholder="Filter by date" triggerClassName="h-[38px] w-[170px] text-[14px]" aria-label="Filter license records by expiry date" />
+            </div>
+          </div>
 
       <div className="min-h-0 flex-1 overflow-auto">
         <table className="w-full min-w-[680px] border-collapse text-center">
-          <thead>
-            <tr className="border-b-2 border-slate-100 text-xs text-slate-500">
-              <th className="whitespace-nowrap px-4 py-4 text-left text-sm font-semibold text-slate-700">License No.</th>
-              <th className="whitespace-nowrap px-4 py-4 text-sm font-semibold text-slate-700">Full Name</th>
-              <th className="whitespace-nowrap px-4 py-4 text-sm font-semibold text-slate-700">Restriction Code</th>
-              <th className="whitespace-nowrap px-4 py-4 text-sm font-semibold text-slate-700">Expiry Date</th>
-              <th className="whitespace-nowrap px-4 py-4 text-sm font-semibold text-slate-700">Status</th>
-              <th className="whitespace-nowrap px-4 py-4 text-sm font-semibold text-slate-700">Action</th>
+          <thead className="sticky top-0 z-10 bg-[#E7E9EC]">
+            <tr>
+              <th className="whitespace-nowrap px-4 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">License No.</th>
+              <th className="whitespace-nowrap px-4 py-4 text-xs font-semibold uppercase tracking-wide text-gray-500">Full Name</th>
+              <th className="whitespace-nowrap px-4 py-4 text-xs font-semibold uppercase tracking-wide text-gray-500">Restriction Code</th>
+              <th className="whitespace-nowrap px-4 py-4 text-xs font-semibold uppercase tracking-wide text-gray-500">Expiry Date</th>
+              <th className="whitespace-nowrap px-4 py-4 text-xs font-semibold uppercase tracking-wide text-gray-500">Status</th>
+              <th className="whitespace-nowrap px-4 py-4 text-xs font-semibold uppercase tracking-wide text-gray-500">Action</th>
             </tr>
           </thead>
           <tbody>

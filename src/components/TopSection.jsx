@@ -1,58 +1,47 @@
 import { useLocation } from "react-router-dom";
+import {
+  CalendarDaysIcon,
+  DocumentTextIcon,
+  IdentificationIcon,
+  ScaleIcon,
+  ShieldCheckIcon,
+  TruckIcon,
+} from "@heroicons/react/24/outline";
+
+// Ordered so more specific paths win; first match is used
+const pages = [
+  { path: "/violations", title: "Violations", description: "Violation types and penalties", icon: DocumentTextIcon },
+  { path: "/license-database", title: "License Database", description: "LTO central driver license records", icon: IdentificationIcon },
+  { path: "/vehicle-database", title: "Vehicle Database", description: "LTO central vehicle registration records", icon: TruckIcon },
+  { path: "/audit-trail", title: "Audit Trail", description: "Record of administrative actions", icon: ShieldCheckIcon },
+  { path: "/adjudication", title: "Adjudication", description: "Review and resolve contested tickets", icon: ScaleIcon },
+];
 
 export default function TopSection() {
-  const location = useLocation();
-
-  const getPageName = (pathname) => {
-    if (pathname.startsWith("/dashboard")) {
-      return "Dashboard";
-    }
-
-    if (pathname.startsWith("/license-database")) {
-      return "LTO CENTRAL LICENSE DATABASE";
-    }
-
-    if (pathname.startsWith("/tickets")) {
-      return "Tickets";
-    }
-
-    if (pathname.startsWith("/adjudication")) {
-      return "Adjudication";
-    }
-
-    if (pathname.startsWith("/settings")) {
-      return "Settings";
-    }
-
-    if (pathname.startsWith("/support")) {
-      return "Support Center";
-    }
-    if (pathname.startsWith("/audit-trail")) {
-      return "Audit Trail";
-    }
-    if (pathname.startsWith("/violations")) {
-      return "Violations";
-    }
-    if (pathname.startsWith("/security")) {
-      return "Security";
-    } 
-    if (pathname.startsWith("/vehicle-database")) {
-      return "LTO CENTRAL VEHICLE DATABASE";
-    }
-    if (pathname.startsWith("/license-database")) {
-      return "LTO CENTRAL LICENSE DATABASE";
-    }
-    return "Dashboard";
-  };
-
-  const activeTab = getPageName(location.pathname);
+  const { pathname } = useLocation();
+  const page =
+    pages.find(({ path }) => pathname === path || pathname.startsWith(`${path}/`)) ?? pages[0];
+  const Icon = page.icon;
+  const today = new Date().toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 
   return (
-   <div className='bg-white w-full border-b-[1px] border-[#D9D9D9] flex items-center px-6 py-6'>
-      <div>
-        <h1 className='text-lg font-semibold text-[16px]'>
-          {activeTab}
-        </h1>
+    <div className='bg-white w-full h-[73px] shrink-0 border-b border-slate-200/80 flex items-center justify-between gap-4 px-6'>
+      <div className='flex items-center gap-3'>
+        <Icon className='h-6 w-6 shrink-0 text-[#1E3A8A]' />
+        <div className='leading-tight'>
+          <h1 className='text-[16px] font-bold tracking-tight text-[#1E3A8A]'>{page.title}</h1>
+          <p className='text-sm font-medium text-slate-500 mt-0.5'>{page.description}</p>
+        </div>
+      </div>
+
+      <div className='hidden sm:flex items-center gap-2 text-sm font-medium text-slate-600'>
+        <CalendarDaysIcon className='h-5 w-5' />
+        <span>{today}</span>
       </div>
     </div>
   );

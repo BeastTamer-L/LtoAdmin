@@ -6,7 +6,7 @@ export default function DateRangeSelect({ value = "Last 30 days", onChange }) {
     <select
         value={value}
         onChange={onChange}
-        className="h-9 w-32 appearance-none rounded-lg border border-[#D9E1EA] bg-white px-5 pr-9 text-xs text-[#102B4C] outline-none cursor-pointer focus:border-[#102B4C]"
+        className="h-9 w-32 appearance-none rounded-lg border border-[#D9E1EA] bg-white px-5 pr-9 text-xs text-[#1E3A8A] outline-none cursor-pointer focus:border-[#1E3A8A]"
     >
         <option>Last 7 days</option>
         <option>Last 30 days</option>

@@ -1,11 +1,13 @@
 
 import { useState } from "react";
 import {
-  Search,
   MapPin,
   ChevronRight,
   ArrowLeft,
 } from "lucide-react";
+import SearchInput from "../components/SearchInput";
+import FilterSelect from "../components/FilterSelect";
+import DatePicker from "../components/DatePicker";
 import Logo from "../assets/logo.png";
 
 const today = new Date();
@@ -146,39 +148,12 @@ export default function AuditTrail() {
         ) : (
         <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white p-4 md:p-5">
           {/* Search and filters */}
-          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-            <div className="relative w-full sm:max-w-md">
-              <Search
-                size={17}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-              />
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search by device, enforcer, location..."
-                className="w-full rounded-md border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-3 text-sm outline-none focus:border-orange-400"
-              />
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="relative flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
+              <SearchInput value={search} onChange={setSearch} placeholder="Search by device, enforcer, location..." />
+              <FilterSelect value={activityFilter} onChange={setActivityFilter} options={["All Activity", "Roadside Apprehension", "Device Shut Down", "Backup Call"]} aria-label="Filter activity by type" />
+              <DatePicker value={selectedDate} onChange={setSelectedDate} placeholder="Filter by date" triggerClassName="h-[38px] w-[170px] text-[14px]" aria-label="Filter activity by date" />
             </div>
-
-            <select
-              value={activityFilter}
-              onChange={(e) => setActivityFilter(e.target.value)}
-              className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 sm:w-36"
-              aria-label="Filter activity by type"
-            >
-              <option>All Activity</option>
-              <option>Roadside Apprehension</option>
-              <option>Device Shut Down</option>
-              <option>Backup Call</option>
-            </select>
-
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={(event) => setSelectedDate(event.target.value)}
-              className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 sm:w-auto"
-              aria-label="Filter activity by date"
-            />
           </div>
 
           {/* Quick view sector filters */}
@@ -210,13 +185,13 @@ export default function AuditTrail() {
           {/* Activity table */}
           <div className="min-h-0 flex-1 overflow-auto">
             <table className="w-full min-w-[850px] border-collapse text-left">
-              <thead className="bg-[#0F2744]/10">
-                <tr className="border-b-2 border-slate-100 text-xs text-slate-500">
-                  <th className="whitespace-nowrap px-3 py-4 text-sm font-semibold text-slate-700">Time</th>
-                  <th className="whitespace-nowrap px-3 py-4 text-sm font-semibold text-slate-700">Device ID</th>
-                  <th className="whitespace-nowrap px-3 py-4 text-sm font-semibold text-slate-700">Enforcer</th>
-                  <th className="whitespace-nowrap px-3 py-4 text-sm font-semibold text-slate-700">Location</th>
-                  <th className="whitespace-nowrap px-3 py-4 text-sm font-semibold text-slate-700">Activity</th>
+              <thead className="sticky top-0 z-10 bg-[#E7E9EC]">
+                <tr>
+                  <th className="whitespace-nowrap px-3 py-4 text-xs font-semibold uppercase tracking-wide text-gray-500">Time</th>
+                  <th className="whitespace-nowrap px-3 py-4 text-xs font-semibold uppercase tracking-wide text-gray-500">Device ID</th>
+                  <th className="whitespace-nowrap px-3 py-4 text-xs font-semibold uppercase tracking-wide text-gray-500">Enforcer</th>
+                  <th className="whitespace-nowrap px-3 py-4 text-xs font-semibold uppercase tracking-wide text-gray-500">Location</th>
+                  <th className="whitespace-nowrap px-3 py-4 text-xs font-semibold uppercase tracking-wide text-gray-500">Activity</th>
                   <th className="px-3 py-4"></th>
                 </tr>
               </thead>
