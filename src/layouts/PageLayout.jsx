@@ -5,22 +5,22 @@ import TopSection from '../components/TopSection'
 export default function DashboardLayout() {
   const location = useLocation()
   const isAuditTrail = location.pathname === '/audit-trail'
-  const isCompanionMap = location.pathname === '/enforcers/companion-map'
   const isViolations = location.pathname === '/violations'
   const isAdjudication = location.pathname === '/adjudication'
   const isLicenseDatabase = location.pathname === '/license-database'
+  const isVehicleDatabase = location.pathname === '/vehicle-database'
   const hasPageManagedSpacing =
     isAuditTrail ||
     isAdjudication ||
-    isCompanionMap ||
     isViolations ||
-    isLicenseDatabase
+    isLicenseDatabase ||
+    isVehicleDatabase
   const hasViewportManagedLayout =
     isAuditTrail ||
     isAdjudication ||
-    isCompanionMap ||
     isViolations ||
-    isLicenseDatabase
+    isLicenseDatabase ||
+    isVehicleDatabase
 
   return (
     <div className="bg-[#F0F4F8] w-full h-screen flex">

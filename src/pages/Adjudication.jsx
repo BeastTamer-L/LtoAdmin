@@ -2,18 +2,24 @@
 import { useState } from "react";
 import {
   Search,
-  CalendarClock,
-  Filter,
   ArrowLeft,
   ArrowRight,
   Play,
 } from "lucide-react";
+
+const today = new Date();
+const todayKey = [
+  today.getFullYear(),
+  String(today.getMonth() + 1).padStart(2, "0"),
+  String(today.getDate()).padStart(2, "0"),
+].join("-");
 
 const adjudicationRecords = [
   {
     id: 1,
     timestamp: "10:24 AM",
     date: "TODAY",
+    dateKey: todayKey,
     plate: "M0967",
     driver: "Garfield Corda",
     violation: "DTS",
@@ -23,6 +29,7 @@ const adjudicationRecords = [
     id: 2,
     timestamp: "10:24 AM",
     date: "TODAY",
+    dateKey: todayKey,
     plate: "M0967",
     driver: "Garfield Corda",
     violation: "DTS",
@@ -32,6 +39,7 @@ const adjudicationRecords = [
     id: 3,
     timestamp: "10:24 AM",
     date: "TODAY",
+    dateKey: todayKey,
     plate: "S0967",
     driver: "Garfield Corda",
     violation: "DTS",
@@ -80,6 +88,13 @@ export default function Adjudication() {
   const [activityFilter, setActivityFilter] = useState("All Activity");
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [selectedDate, setSelectedDate] = useState("");
+  const [showAction, setShowAction] = useState(false);
+  const [findings, setFindings] = useState(
+    "Verified emergency vehicle presence in video at 00:05. Right-of-way granted."
+  );
+  const [resolution, setResolution] = useState("");
+  const [rulingMessage, setRulingMessage] = useState("");
+  const [savedRulings, setSavedRulings] = useState({});
 
   const filteredRecords = adjudicationRecords.filter((record) => {
     const searchText = [
@@ -98,11 +113,108 @@ export default function Adjudication() {
       activityFilter === "All Activity" ||
       record.activity === activityFilter;
 
-    // sample records
-    const matchesDate = !selectedDate || record.date === selectedDate;
+    const matchesDate = !selectedDate || record.dateKey === selectedDate;
 
     return matchesSearch && matchesActivity && matchesDate;
   });
+
+  if (selectedRecord && showAction) {
+    return (
+      <div className="flex h-full min-h-0 flex-col bg-[#F0F4F8] text-slate-800">
+        <main className="min-h-0 flex-1 overflow-auto px-5 py-6 md:px-8 md:py-7">
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedRecord(null);
+              setShowAction(false);
+              setRulingMessage("");
+            }}
+            className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-800"
+          >
+            <ArrowLeft size={16} />
+            Adjudication List
+          </button>
+
+          <section className="overflow-hidden rounded-md border border-slate-200 bg-white">
+            <header className="bg-[#102D4A] px-5 py-3 text-white">
+              <h2 className="text-sm font-bold uppercase">
+                PTSMD Adjudication Action
+              </h2>
+              <p className="text-xs text-slate-300">UOVR-2026-99182</p>
+            </header>
+
+            <div className="space-y-8 p-5 md:p-7">
+              <div className="grid gap-3 md:grid-cols-[minmax(180px,0.8fr)_minmax(0,2fr)]">
+                <label
+                  htmlFor="adjudicator-findings"
+                  className="pt-1 text-xs font-semibold uppercase text-slate-500"
+                >
+                  Adjudicator Findings
+                </label>
+                <textarea
+                  id="adjudicator-findings"
+                  value={findings}
+                  onChange={(event) => setFindings(event.target.value)}
+                  rows={4}
+                  className="w-full resize-y rounded-md border border-slate-200 bg-slate-100 p-4 text-sm text-slate-700 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                />
+              </div>
+
+              <fieldset>
+                <legend className="mb-2 text-xs font-semibold uppercase text-slate-500">
+                  Resolution
+                </legend>
+                <div className="space-y-2 pl-2 text-sm text-slate-700">
+                  {[
+                    "Dismiss Case (Clear Fine)",
+                    "Uphold (Sustain Fine & Demerits)",
+                    "Uphold & Elevate Escalation to LTO",
+                  ].map((option) => (
+                    <label key={option} className="flex w-fit items-center gap-2">
+                      <input
+                        type="radio"
+                        name="adjudication-resolution"
+                        value={option}
+                        checked={resolution === option}
+                        onChange={(event) => setResolution(event.target.value)}
+                        className="accent-[#102D4A]"
+                      />
+                      {option}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            </div>
+          </section>
+
+          <div className="mt-4 flex flex-col items-end gap-2">
+            {rulingMessage && (
+              <p role="status" className="text-sm text-slate-600">
+                {rulingMessage}
+              </p>
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                if (!resolution) {
+                  setRulingMessage("Select a resolution before saving the ruling.");
+                  return;
+                }
+                setSavedRulings((current) => ({
+                  ...current,
+                  [selectedRecord]: { findings, resolution },
+                }));
+                setRulingMessage("Ruling saved.");
+              }}
+              className="rounded-md bg-[#102D4A] px-6 py-3 text-sm font-medium text-white hover:bg-[#1a3b5c]"
+            >
+              Save Ruling
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   if (selectedRecord) {
     const caseFields = [
@@ -141,6 +253,16 @@ export default function Adjudication() {
               </button>
               <button
                 type="button"
+                onClick={() => {
+                  setShowAction(true);
+                  const savedRuling = savedRulings[selectedRecord];
+                  setFindings(
+                    savedRuling?.findings ??
+                      "Verified emergency vehicle presence in video at 00:05. Right-of-way granted."
+                  );
+                  setResolution(savedRuling?.resolution ?? "");
+                  setRulingMessage("");
+                }}
                 className="inline-flex items-center gap-1.5 font-medium text-blue-600 hover:text-blue-800"
               >
                 Adjudication Action
@@ -257,10 +379,10 @@ export default function Adjudication() {
     <div className="flex h-full min-h-0 flex-col bg-slate-100 text-slate-800">
 
       <main className="flex min-h-0 flex-1 p-4 md:p-6">
-        <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+        <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white p-4 shadow-sm md:p-5">
           {/* Search and filters */}
-          <div className="flex flex-col gap-3 border-b border-slate-200 p-4 md:flex-row md:items-center">
-            <div className="relative flex-1">
+          <div className="mb-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+            <div className="relative w-full sm:max-w-md">
               <Search
                 size={17}
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
@@ -270,58 +392,53 @@ export default function Adjudication() {
                 type="text"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search by ticket no...."
+                placeholder="Search by plate, driver, violation..."
                 className="w-full rounded-md border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-3 text-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
               />
             </div>
 
-            <div className="relative md:w-40">
-              <Filter
-                size={15}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
-              />
-
-              <select
-                value={activityFilter}
-                onChange={(event) =>
-                  setActivityFilter(event.target.value)
-                }
-                className="w-full appearance-auto rounded-md border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-sm outline-none focus:border-orange-400"
-              >
-                {activityOptions.map((activity) => (
-                  <option key={activity} value={activity}>
-                    {activity}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => {
-                setSearch("");
-                setActivityFilter("All Activity");
-                setSelectedDate("");
-              }}
-              className="flex items-center justify-center gap-2 rounded-md border border-slate-200 px-3 py-2.5 text-sm hover:bg-slate-50"
+            <select
+              value={activityFilter}
+              onChange={(event) =>
+                setActivityFilter(event.target.value)
+              }
+              className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 sm:w-36"
+              aria-label="Filter adjudication by activity"
             >
-              <CalendarClock size={16} />
-              Date and Time
-            </button>
+              {activityOptions.map((activity) => (
+                <option key={activity} value={activity}>
+                  {activity}
+                </option>
+              ))}
+            </select>
+
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(event) => setSelectedDate(event.target.value)}
+              className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 sm:w-auto"
+              aria-label="Filter adjudication by date"
+            />
           </div>
 
           {/* Adjudication table */}
           <div className="min-h-0 flex-1 overflow-auto">
             <table className="w-full min-w-[760px] table-fixed border-collapse text-left">
-              <thead>
-                <tr className="border-b-2 border-slate-100 text-xs uppercase tracking-wide text-slate-500">
-                  <th className="px-4 py-5 font-semibold">
+              <thead className="bg-[#0F2744]/10">
+                <tr className="border-b-2 border-slate-100 text-xs text-slate-500">
+                  <th className="whitespace-nowrap px-3 py-4 text-sm font-semibold text-slate-700">
                     Timestamp Captured
                   </th>
-                  <th className="px-4 py-5 font-semibold">Plate #</th>
-                  <th className="px-4 py-5 font-semibold">Driver</th>
-                  <th className="px-4 py-5 font-semibold">Violation</th>
-                  <th className="whitespace-nowrap px-4 py-5 font-semibold">
+                  <th className="whitespace-nowrap px-3 py-4 text-sm font-semibold text-slate-700">
+                    Plate #
+                  </th>
+                  <th className="whitespace-nowrap px-3 py-4 text-sm font-semibold text-slate-700">
+                    Driver
+                  </th>
+                  <th className="whitespace-nowrap px-3 py-4 text-sm font-semibold text-slate-700">
+                    Violation
+                  </th>
+                  <th className="whitespace-nowrap px-3 py-4 text-sm font-semibold text-slate-700">
                     Activity
                   </th>
                 </tr>
@@ -336,9 +453,11 @@ export default function Adjudication() {
                       key={record.id}
                       tabIndex={0}
                       aria-selected={isSelected}
-                      onClick={() =>
-                        setSelectedRecord(record.id)
-                      }
+                      onClick={() => {
+                        setSelectedRecord(record.id);
+                        setShowAction(false);
+                        setRulingMessage("");
+                      }}
                       onKeyDown={(event) => {
                         if (
                           event.key === "Enter" ||
@@ -346,6 +465,8 @@ export default function Adjudication() {
                         ) {
                           event.preventDefault();
                           setSelectedRecord(record.id);
+                          setShowAction(false);
+                          setRulingMessage("");
                         }
                       }}
                       className={`cursor-pointer border-b border-slate-100 transition-colors ${
@@ -355,7 +476,7 @@ export default function Adjudication() {
                       }`}
                     >
                       <td
-                        className={`border-l-[6px] px-4 py-6 ${
+                        className={`border-l-[6px] px-3 py-4 ${
                           isSelected
                             ? "border-orange-500"
                             : "border-transparent"
@@ -369,19 +490,19 @@ export default function Adjudication() {
                         </p>
                       </td>
 
-                      <td className="px-4 py-6 text-sm font-medium text-slate-800">
+                      <td className="px-3 py-4 text-sm font-medium text-slate-800">
                         {record.plate}
                       </td>
 
-                      <td className="px-4 py-6 text-sm font-medium text-slate-800">
+                      <td className="px-3 py-4 text-sm font-medium text-slate-800">
                         {record.driver}
                       </td>
 
-                      <td className="px-4 py-6 text-sm text-slate-800">
+                      <td className="px-3 py-4 text-sm text-slate-800">
                         {record.violation}
                       </td>
 
-                      <td className="whitespace-nowrap px-4 py-6 text-sm font-medium text-slate-800">
+                      <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-slate-800">
                         <span className="whitespace-nowrap">
                           {record.activity}
                         </span>

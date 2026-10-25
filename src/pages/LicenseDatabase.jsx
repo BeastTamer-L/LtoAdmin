@@ -7,6 +7,7 @@ import {
   UserRound,
   PlayCircle,
   MapPin,
+  MoreVertical,
 } from "lucide-react";
 
 const drivers = [
@@ -42,6 +43,28 @@ const drivers = [
     status: "Valid - Active",
     points: "01 / 40 (Low Risk)",
     address: "Caloocan City, Metro Manila",
+  },
+  {
+    id: 4,
+    fullName: "Agnes Tamayo",
+    licenseNumber: "NCO-2021-321654",
+    dateOfBirth: "September 12, 1989",
+    expiration: "September 30, 2024",
+    licenseClass: "Professional",
+    status: "Expired",
+    points: "12 / 40 (Moderate Risk)",
+    address: "Caloocan City, Metro Manila",
+  },
+  {
+    id: 5,
+    fullName: "Ivan Torculas",
+    licenseNumber: "NCO-2022-456789",
+    dateOfBirth: "June 8, 1992",
+    expiration: "May 14, 2027",
+    licenseClass: "Non-Professional",
+    status: "Suspended",
+    points: "24 / 40 (High Risk)",
+    address: "Quezon City, Metro Manila",
   },
 ];
 
@@ -148,15 +171,27 @@ export default function LicenseDatabase() {
   // Initially show the table, not the profile.
   const [selectedDriver, setSelectedDriver] = useState(null);
   const [tableSearch, setTableSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [expiryFilter, setExpiryFilter] = useState("");
   const [search, setSearch] = useState("");
   const [selectedTab, setSelectedTab] = useState("Citation History");
   const [selectedCitationId, setSelectedCitationId] = useState(null);
 
-  const filteredDrivers = drivers.filter((driver) =>
-    `${driver.fullName} ${driver.licenseNumber} ${driver.dateOfBirth}`
-      .toLowerCase()
-      .includes(tableSearch.toLowerCase())
-  );
+  const filteredDrivers = drivers.filter((driver) => {
+    const matchesSearch =
+      `${driver.fullName} ${driver.licenseNumber} ${driver.dateOfBirth}`
+        .toLowerCase()
+        .includes(tableSearch.toLowerCase());
+    const matchesStatus =
+      statusFilter === "All" ||
+      (statusFilter === "Active" && /active/i.test(driver.status)) ||
+      (statusFilter === "Expired" && /expired/i.test(driver.status)) ||
+      (statusFilter === "Suspended" && /suspended/i.test(driver.status));
+    const matchesExpiry =
+      !expiryFilter || formatExpiryDate(driver.expiration) === expiryFilter;
+
+    return matchesSearch && matchesStatus && matchesExpiry;
+  });
 
   const filteredCitations = citations.filter(
     (citation) =>
@@ -202,6 +237,10 @@ export default function LicenseDatabase() {
             drivers={filteredDrivers}
             search={tableSearch}
             setSearch={setTableSearch}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            expiryFilter={expiryFilter}
+            setExpiryFilter={setExpiryFilter}
             onSelectDriver={openDriver}
           />
         ) : (
@@ -269,60 +308,116 @@ export default function LicenseDatabase() {
   );
 }
 
-function DriverTable({ drivers, search, setSearch, onSelectDriver }) {
+function DriverTable({
+  drivers,
+  search,
+  setSearch,
+  statusFilter,
+  setStatusFilter,
+  expiryFilter,
+  setExpiryFilter,
+  onSelectDriver,
+}) {
   return (
     <section className="flex min-h-full flex-1 flex-col rounded-lg border border-slate-200 bg-white p-4 shadow-sm md:p-6">
-      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        
-      </div>
+      <div className="mb-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+        <div className="relative w-full sm:max-w-md">
+          <Search
+            size={17}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+          />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by license no..."
+            className="w-full rounded-md border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-3 text-sm outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+          />
+        </div>
 
-      <div className="relative mb-5 max-w-lg">
-        <Search
-          size={18}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-        />
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          aria-label="Filter by license status"
+          className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-orange-400 sm:w-36"
+        >
+          <option>All</option>
+          <option>Active</option>
+          <option>Expired</option>
+          <option>Suspended</option>
+        </select>
+
         <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by full name, license number, or date of birth..."
-          className="w-full rounded-md border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm outline-none focus:border-blue-500"
+          type="date"
+          value={expiryFilter}
+          onChange={(e) => setExpiryFilter(e.target.value)}
+          className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 sm:w-auto"
+          aria-label="Filter license records by expiry date"
         />
       </div>
 
       <div className="min-h-0 flex-1 overflow-auto">
-        <table className="w-full min-w-[680px] border-collapse text-left">
+        <table className="w-full min-w-[680px] border-collapse text-center">
           <thead>
-            <tr className="bg-slate-200 text-xs uppercase tracking-wide text-slate-600">
-              <th className="px-4 py-4 font-semibold">Full Name</th>
-              <th className="px-4 py-4 font-semibold">License Number</th>
-              <th className="px-4 py-4 font-semibold">Date of Birth</th>
-              <th className="px-4 py-4 font-semibold">Class</th>
+            <tr className="border-b-2 border-slate-100 text-xs text-slate-500">
+              <th className="whitespace-nowrap px-4 py-4 text-left text-sm font-semibold text-slate-700">License No.</th>
+              <th className="whitespace-nowrap px-4 py-4 text-sm font-semibold text-slate-700">Full Name</th>
+              <th className="whitespace-nowrap px-4 py-4 text-sm font-semibold text-slate-700">Restriction Code</th>
+              <th className="whitespace-nowrap px-4 py-4 text-sm font-semibold text-slate-700">Expiry Date</th>
+              <th className="whitespace-nowrap px-4 py-4 text-sm font-semibold text-slate-700">Status</th>
+              <th className="whitespace-nowrap px-4 py-4 text-sm font-semibold text-slate-700">Action</th>
             </tr>
           </thead>
           <tbody>
-            {drivers.map((driver) => (
-              <tr
-                key={driver.id}
-                onClick={() => onSelectDriver(driver)}
-                className="cursor-pointer border-b border-slate-100 text-sm transition hover:bg-blue-50"
-              >
-                <td className="px-4 py-4 font-medium">{driver.fullName}</td>
-                <td className="px-4 py-4 font-semibold text-blue-600">
-                  {driver.licenseNumber}
-                </td>
-                <td className="px-4 py-4 text-slate-600">
-                  {driver.dateOfBirth}
-                </td>
-                <td className="px-4 py-4 text-slate-600">
-                  {driver.licenseClass}
-                </td>
-              </tr>
-            ))}
+            {drivers.map((driver) => {
+              const statusStyle = /suspended/i.test(driver.status)
+                ? "border-l-orange-500 bg-orange-50"
+                : /expired/i.test(driver.status)
+                  ? "border-l-red-500 bg-red-50"
+                  : "border-l-green-600 bg-green-50";
+
+              return (
+                <tr
+                  key={driver.id}
+                  onClick={() => onSelectDriver(driver)}
+                  className={`cursor-pointer border-b border-white border-l-[5px] text-sm transition hover:brightness-[0.98] ${statusStyle}`}
+                >
+                  <td className="px-4 py-3 text-left font-medium">
+                    {driver.licenseNumber}
+                  </td>
+                  <td className="px-4 py-3 font-medium">{driver.fullName}</td>
+                  <td className="px-4 py-3 text-slate-700">
+                    A, A1, B, B1, B2, C
+                  </td>
+                  <td className="px-4 py-3">{formatExpiryDate(driver.expiration)}</td>
+                  <td className="px-4 py-3 text-xs">
+                    {/suspended/i.test(driver.status)
+                      ? "Suspended"
+                      : /expired/i.test(driver.status)
+                        ? "Expired"
+                        : "Active"}
+                  </td>
+                  <td className="px-4 py-2">
+                    <button
+                      type="button"
+                      aria-label={`View ${driver.fullName}'s license record`}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onSelectDriver(driver);
+                      }}
+                      className="rounded p-1 text-slate-400 hover:bg-white hover:text-slate-700"
+                    >
+                      <MoreVertical size={18} />
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
 
             {drivers.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-10 text-center text-sm text-slate-500">
-                  No driver records found.
+                <td colSpan={6} className="px-4 py-10 text-center text-sm text-slate-500">
+                  No license records found.
                 </td>
               </tr>
             )}
@@ -331,6 +426,15 @@ function DriverTable({ drivers, search, setSearch, onSelectDriver }) {
       </div>
     </section>
   );
+}
+
+function formatExpiryDate(value) {
+  const date = new Date(value);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
 }
 
 function ProfileSummary({ driver }) {

@@ -84,6 +84,7 @@ const detailFields = [
 export default function Violations() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [dateFilter, setDateFilter] = useState("");
   const [selectedViolation, setSelectedViolation] = useState(null);
 
   const filteredRecords = displayedViolationRecords.filter((record) => {
@@ -103,8 +104,13 @@ export default function Violations() {
 
     const matchesStatus =
       statusFilter === "All" || record.status === statusFilter;
+    const normalizedRecordDate = record.date
+      .split("-")
+      .map((part, index) => (index === 0 ? part : part.padStart(2, "0")))
+      .join("-");
+    const matchesDate = !dateFilter || normalizedRecordDate === dateFilter;
 
-    return matchesSearch && matchesStatus;
+    return matchesSearch && matchesStatus && matchesDate;
   });
   const selectedRecord = displayedViolationRecords.find(
     (record) => record.id === selectedViolation
@@ -220,7 +226,7 @@ export default function Violations() {
       <main className="flex min-h-0 flex-1 p-4 md:p-6">
         <section className="flex min-h-0 flex-1 flex-col rounded-lg border border-slate-200 bg-white p-4 shadow-sm md:p-5">
           {/* Search and status filter */}
-          <div className="mb-7 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="mb-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
             <div className="relative w-full sm:max-w-md">
               <Search
                 size={17}
@@ -247,12 +253,20 @@ export default function Violations() {
                 </option>
               ))}
             </select>
+
+            <input
+              type="date"
+              value={dateFilter}
+              onChange={(event) => setDateFilter(event.target.value)}
+              className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 sm:w-auto"
+              aria-label="Filter violations by date"
+            />
           </div>
 
           {/* Violations table */}
           <div className="min-h-0 flex-1 overflow-auto">
             <table className="w-full min-w-[850px] border-collapse text-left">
-              <thead>
+              <thead className="bg-[#0F2744]/10">
                 <tr className="border-b-2 border-slate-100 text-xs text-slate-500">
                   {[
                     "Ticket No.",

@@ -8,10 +8,8 @@ export default function TopSection() {
       return "Dashboard";
     }
 
-    if (pathname.startsWith("/enforcers")) {
-      return pathname === "/enforcers/companion-map"
-        ? "Enforcers Companion Map"
-        : "Enforcers";
+    if (pathname.startsWith("/license-database")) {
+      return "LTO CENTRAL LICENSE DATABASE";
     }
 
     if (pathname.startsWith("/tickets")) {
@@ -20,10 +18,6 @@ export default function TopSection() {
 
     if (pathname.startsWith("/adjudication")) {
       return "Adjudication";
-    }
-
-    if (pathname.startsWith("/reports")) {
-      return "Reports";
     }
 
     if (pathname.startsWith("/settings")) {
@@ -42,6 +36,12 @@ export default function TopSection() {
     if (pathname.startsWith("/security")) {
       return "Security";
     } 
+    if (pathname.startsWith("/vehicle-database")) {
+      return "LTO CENTRAL VEHICLE DATABASE";
+    }
+    if (pathname.startsWith("/license-database")) {
+      return "LTO CENTRAL LICENSE DATABASE";
+    }
     return "Dashboard";
   };
 

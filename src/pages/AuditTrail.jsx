@@ -2,10 +2,8 @@
 import { useState } from "react";
 import {
   Search,
-  CalendarClock,
   MapPin,
   ChevronRight,
-  Filter,
   ArrowLeft,
 } from "lucide-react";
 import Logo from "../assets/logo.png";
@@ -146,10 +144,10 @@ export default function AuditTrail() {
             </div>
           </section>
         ) : (
-        <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white">
+        <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white p-4 md:p-5">
           {/* Search and filters */}
-          <div className="flex flex-col gap-3 border-b border-slate-200 p-4 md:flex-row md:items-center">
-            <div className="relative flex-1">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+            <div className="relative w-full sm:max-w-md">
               <Search
                 size={17}
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
@@ -157,45 +155,34 @@ export default function AuditTrail() {
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search by ticket no..."
+                placeholder="Search by device, enforcer, location..."
                 className="w-full rounded-md border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-3 text-sm outline-none focus:border-orange-400"
               />
             </div>
 
-            <div className="relative">
-              <Filter
-                size={15}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
-              />
-              <select
-                value={activityFilter}
-                onChange={(e) => setActivityFilter(e.target.value)}
-                className="w-full rounded-md border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-8 text-sm md:w-44"
-              >
-                <option>All Activity</option>
-                <option>Roadside Apprehension</option>
-                <option>Device Shut Down</option>
-                <option>Backup Call</option>
-              </select>
-            </div>
-
-            <label
-              className="relative flex cursor-pointer items-center justify-center gap-2 rounded-md border border-slate-200 px-3 py-2.5 text-sm hover:bg-slate-50"
+            <select
+              value={activityFilter}
+              onChange={(e) => setActivityFilter(e.target.value)}
+              className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 sm:w-36"
+              aria-label="Filter activity by type"
             >
-              <CalendarClock size={16} />
-              {selectedDate || "Date and Time"}
-              <input
-                type="date"
-                value={selectedDate}
-                onChange={(event) => setSelectedDate(event.target.value)}
-                aria-label="Filter activity by date"
-                className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-              />
-            </label>
+              <option>All Activity</option>
+              <option>Roadside Apprehension</option>
+              <option>Device Shut Down</option>
+              <option>Backup Call</option>
+            </select>
+
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(event) => setSelectedDate(event.target.value)}
+              className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 sm:w-auto"
+              aria-label="Filter activity by date"
+            />
           </div>
 
           {/* Quick view sector filters */}
-          <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
+          <div className="mb-4 flex flex-wrap items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-4 py-3">
             <span className="mr-2 text-xs font-semibold text-slate-600">
               Quick View
             </span>
@@ -223,14 +210,14 @@ export default function AuditTrail() {
           {/* Activity table */}
           <div className="min-h-0 flex-1 overflow-auto">
             <table className="w-full min-w-[850px] border-collapse text-left">
-              <thead>
-                <tr className="border-b border-slate-200 text-xs uppercase text-slate-500">
-                  <th className="px-5 py-5 text-center font-semibold">Time</th>
-                  <th className="px-4 py-5 font-semibold">Device ID</th>
-                  <th className="px-4 py-5 font-semibold">Enforcer</th>
-                  <th className="px-4 py-5 font-semibold">Location</th>
-                  <th className="px-4 py-5 font-semibold">Activity</th>
-                  <th className="px-3 py-5"></th>
+              <thead className="bg-[#0F2744]/10">
+                <tr className="border-b-2 border-slate-100 text-xs text-slate-500">
+                  <th className="whitespace-nowrap px-3 py-4 text-sm font-semibold text-slate-700">Time</th>
+                  <th className="whitespace-nowrap px-3 py-4 text-sm font-semibold text-slate-700">Device ID</th>
+                  <th className="whitespace-nowrap px-3 py-4 text-sm font-semibold text-slate-700">Enforcer</th>
+                  <th className="whitespace-nowrap px-3 py-4 text-sm font-semibold text-slate-700">Location</th>
+                  <th className="whitespace-nowrap px-3 py-4 text-sm font-semibold text-slate-700">Activity</th>
+                  <th className="px-3 py-4"></th>
                 </tr>
               </thead>
 
@@ -250,7 +237,7 @@ export default function AuditTrail() {
                     }`}
                   >
                     <td
-                      className={`px-5 py-5 text-center ${
+                      className={`px-3 py-4 text-center ${
                         selectedLog === log.id
                           ? "border-l-[6px] border-orange-500"
                           : "border-l-[6px] border-transparent"
@@ -260,9 +247,9 @@ export default function AuditTrail() {
                       <p className="mt-1 text-xs text-slate-400">{log.date}</p>
                     </td>
 
-                    <td className="px-4 py-5 text-sm">{log.deviceId}</td>
+                    <td className="px-3 py-4 text-sm">{log.deviceId}</td>
 
-                    <td className="px-4 py-5">
+                    <td className="px-3 py-4">
                       <div className="flex items-center gap-3">
                         <img
                           src={Logo}
@@ -280,7 +267,7 @@ export default function AuditTrail() {
                       </div>
                     </td>
 
-                    <td className="px-4 py-5">
+                    <td className="px-3 py-4">
                       <div className="flex items-center gap-2">
                         <MapPin size={21} className="shrink-0 text-slate-700" />
                         <div>
@@ -292,9 +279,9 @@ export default function AuditTrail() {
                       </div>
                     </td>
 
-                    <td className="px-4 py-5 text-sm">{log.activity}</td>
+                    <td className="px-3 py-4 text-sm">{log.activity}</td>
 
-                    <td className="px-3 py-5">
+                    <td className="px-3 py-4">
                       <ChevronRight
                         size={19}
                         className={`transition ${

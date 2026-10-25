@@ -2,18 +2,14 @@ import Logo from "../assets/logo.png";
 
 import {
   LayoutDashboard,
-  UsersRound,
   FileText,
-  Settings,
   ShieldCheck,
   LogOut,
   ChevronLeft,
   ChevronRight,
   Eye,
-  MapPin,
-  Briefcase,
   IdCard,
-  Ticket,
+  CarFront,
   Scale,
 } from "lucide-react";
 
@@ -30,35 +26,19 @@ const menuItems = [
     path: "/dashboard",
   },
   {
-    name: "Enforcers",
-    icon: UsersRound,
-    path: "/enforcers",
-  },
-  {
-    name: "Sectors",
-    icon: MapPin,
-    path: "/sectors",
-  },
-  {
-    name: "Positions",
-    icon: Briefcase,
-    path: "/positions",
-  },
-  {
-    name: "Tickets",
-    icon: Ticket,
-    path: "/tickets",
-  },
-  {
     name: "Violations",
     icon: FileText,
     path: "/violations",
   },
-  
   {
-    name: "Reports",
-    icon: FileText,
-    path: "/reports",
+  name: "License Database",
+  icon: IdCard,
+  path: "/license-database",
+  },
+  {
+    name: "Vehicle Database",
+    icon: CarFront,
+    path: "/vehicle-database",
   },
   {
   name: "Audit Trail",
@@ -75,26 +55,10 @@ const menuItems = [
     icon: Eye,
     path: "/security",
   },
-  {
-  name: "License Database",
-  icon: IdCard,
-  path: "/license-database",
-},
+  
+ 
 ];
 
-
-const bottomItems = [
-  {
-    name: "Settings",
-    icon: Settings,
-    path: "/settings",
-  },
-  {
-    name: "Support center",
-    icon: ShieldCheck,
-    path: "/support",
-  },
-];
 
 export default function Sidebar() {
   // Initialize collapsed state from localStorage or default to false
@@ -179,7 +143,7 @@ export default function Sidebar() {
             </div>
 
             {!collapsed && (
-              <div className="flex flex-col">
+              <div className="flex translate-y-1 flex-col">
                 <h2 className="text-2xl font-black tracking-tight leading-none" style={{ fontFamily: '"TT Hoves", sans-serif' }}>
                   <span className="italic text-orange-500">CAM</span>
                   <span className="ml-[2px] text-white">OTE</span>
@@ -189,9 +153,6 @@ export default function Sidebar() {
                   <span className="h-1 w-[48px] bg-white/80 rounded-full" />
                   <span className="h-1 w-[32px] bg-orange-500 rounded-full" />
                 </div>
-                <span className="mt-1 text-[10px] font-medium tracking-wider text-slate-400 uppercase">
-                  North Caloocan
-                </span>
               </div>
             )}
           </div>
@@ -316,60 +277,6 @@ export default function Sidebar() {
       <div className="px-3">
         {/* Divider */}
         <div className="border-t border-[#29435F] mb-5" />
-
-        {/* Bottom Navigation */}
-        <nav className="space-y-1 mb-4">
-          {bottomItems.map((item) => {
-            const Icon = item.icon;
-
-            return (
-              <NavLink
-                key={item.name}
-                to={item.path}
-                title={collapsed ? item.name : undefined}
-                className={({ isActive }) => `
-                  w-full
-                  h-11
-                  rounded-lg
-                  flex
-                  items-center
-                  transition-all duration-200
-                  active:scale-[0.98]
-                  ${
-                    collapsed
-                      ? "justify-center px-0"
-                      : "gap-4 px-3"
-                  }
-                  ${
-                    isActive
-                      ? "bg-white text-[#F96800] font-semibold shadow-sm"
-                      : "text-[#B4C0CC] hover:bg-[#1A3958] hover:text-white font-medium"
-                  }
-                `}
-              >
-                {({ isActive }) => (
-                  <>
-                    <Icon
-                      size={19}
-                      strokeWidth={1.8}
-                      className={
-                        isActive
-                          ? "text-[#F96800]"
-                          : "text-[#A8B6C5]"
-                      }
-                    />
-
-                    {!collapsed && (
-                      <span className="whitespace-nowrap">
-                        {item.name}
-                      </span>
-                    )}
-                  </>
-                )}
-              </NavLink>
-            );
-          })}
-        </nav>
 
         <div
           className={`
