@@ -141,7 +141,7 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-screen w-full flex-col items-center justify-center gap-5 bg-[#1E3A8A] px-4 py-8">
+    <div className="flex min-h-screen w-full flex-col items-center justify-center gap-5 bg-slate-900 px-4 py-8">
       {/* Original Card Layout - Reverted to Previous Design */}
       <div className="w-full max-w-[400px] rounded-lg bg-white p-8 shadow-xl">
         <div className="relative">
@@ -149,16 +149,14 @@ export default function Login() {
             <div className="w-[180px] shrink-0">
               <h2 className="text-right text-4xl font-black tracking-tight" style={{ fontFamily: '"TT Hoves", sans-serif' }}>
                 <span className="italic text-orange-500">CAM</span>
-                <span className="ml-[3px] text-[#1E3A8A]">OTE</span>
+                <span className="ml-[3px] text-[#243c56]">OTE</span>
               </h2>
               <div className="mt-2 ml-auto flex w-[88%] flex-col items-end gap-1" aria-hidden="true">
-                <span className="h-1.5 w-[105px] bg-[#1E3A8A]" />
+                <span className="h-1.5 w-[105px] bg-[#243c56]" />
                 <span className="h-1.5 w-[67px] bg-orange-500" />
               </div>
             </div>
-            <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-[#1E3A8A]">
-              <img src={Logo} alt="CAMOTE road and aperture logo" className="h-16 w-16 object-contain" />
-            </div>
+            <img src={Logo} alt="CAMOTE road and aperture logo" className="h-20 w-20 shrink-0 object-contain" />
           </div>
           <p className="mb-8 mt-4 text-center text-xs font-medium uppercase tracking-[0.2em] text-slate-500">
             A Simulated LTO Environment
@@ -259,7 +257,7 @@ export default function Login() {
             <div className="mt-2 text-right">
               <a
                 href="/forgot-password"
-                className="text-sm text-[#1E3A8A] hover:underline"
+                className="text-sm text-[#0F2744] hover:underline"
               >
                 Forgot Password?
               </a>
@@ -268,7 +266,7 @@ export default function Login() {
 
             <button
               type="submit"
-              className="mt-6 w-full cursor-pointer rounded-md bg-[#1E3A8A] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#1E3A8A]/90 focus:outline-none focus:ring-2 focus:ring-[#e7600d] focus:ring-opacity-75 disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-6 w-full cursor-pointer rounded-md bg-[#0F2744] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#0F2744]/90 focus:outline-none focus:ring-2 focus:ring-[#e7600d] focus:ring-opacity-75 disabled:cursor-not-allowed disabled:opacity-60"
               disabled={submitting || lockoutActive}
             >
               {submitting ? 'Signing In...' : 'Sign In'}

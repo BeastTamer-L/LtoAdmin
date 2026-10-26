@@ -32,9 +32,9 @@ export default function TopSection() {
   return (
     <div className='bg-white w-full h-[73px] shrink-0 border-b border-slate-200/80 flex items-center justify-between gap-4 px-6'>
       <div className='flex items-center gap-3'>
-        <Icon className='h-6 w-6 shrink-0 text-[#1E3A8A]' />
+        <Icon className='h-6 w-6 shrink-0 text-[#0F2744]' />
         <div className='leading-tight'>
-          <h1 className='text-[16px] font-bold tracking-tight text-[#1E3A8A]'>{page.title}</h1>
+          <h1 className='text-[16px] font-bold tracking-tight text-[#0F2744]'>{page.title}</h1>
           <p className='text-sm font-medium text-slate-500 mt-0.5'>{page.description}</p>
         </div>
       </div>

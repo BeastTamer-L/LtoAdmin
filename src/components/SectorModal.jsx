@@ -333,7 +333,7 @@ export default function SectorModal({ isOpen, onClose, handleSubmit }) {
             <button
               type="submit"
               disabled={saving || loading}
-              className="bg-[#1E3A8A] hover:bg-[#2A4A9E] text-white min-w-[140px] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-[#0F2744] hover:bg-[#173A64] text-white min-w-[140px] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving ? "Saving..." : "Save Sector"}
             </button>

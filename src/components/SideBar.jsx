@@ -88,10 +88,10 @@ export default function Sidebar() {
       className={`
         relative
         h-screen
-        bg-[#1E3A8A]
+        bg-[#102D4A]
         text-white
         flex flex-col
-        border-r border-[#34519F]
+        border-r border-[#29435F]
         transition-all duration-500 ease-in-out
         shrink-0
         ${collapsed ? "w-[80px]" : "w-[260px]"}
@@ -102,7 +102,7 @@ export default function Sidebar() {
         className={`
           h-[88px]
           flex items-center
-          border-b border-[#34519F]
+          border-b border-[#29435F]
           px-[18px]
         `}
       >
@@ -157,7 +157,7 @@ export default function Sidebar() {
             ${
               collapsed
                 ? "left-[68px] top-[28px] border-[#F96800] bg-[#F96800] text-white hover:border-[#EE6500] hover:bg-[#EE6500]"
-                : "left-[212px] top-[30px] border-transparent bg-transparent text-[#B4C0CC] hover:bg-[#2A4A9E] hover:text-white"
+                : "left-[212px] top-[30px] border-transparent bg-transparent text-[#B4C0CC] hover:bg-[#1a3b5c] hover:text-white"
             }
           `}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
@@ -247,7 +247,7 @@ export default function Sidebar() {
 
       <div className="px-3">
         {/* Divider */}
-        <div className="border-t border-[#34519F] mb-5" />
+        <div className="border-t border-[#29435F] mb-5" />
 
         <div
           className={`

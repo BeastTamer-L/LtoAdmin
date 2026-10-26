@@ -20,7 +20,7 @@ export default function Modal({
         {/* Header */}
         <div className="flex items-start justify-between">
           <div>
-            <h2 className="text-[16px] font-semibold text-[#1E3A8A]">
+            <h2 className="text-[16px] font-semibold text-[#0F2744]">
               {title}
             </h2>
 

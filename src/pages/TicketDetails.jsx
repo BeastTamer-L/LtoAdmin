@@ -39,9 +39,9 @@ export default function Ticket() {
                 <h1 className='text-md font-semibold text-[#3B82F6]'>Back</h1>
             </div>
             <div className='bg-white w-full h-max border-[1px] border-[#E2E8F0] rounded-lg'>
-                <div className='flex items-center justify-between mb-4 w-full bg-[#1E3A8A] rounded-t-lg'>
+                <div className='flex items-center justify-between mb-4 w-full bg-[#0F2744] rounded-t-lg'>
                     <div className='flex flex-col items-start px-6 py-6'>
-                        <h1 className='text-white text-[16px] font-semibold'><span className='text-[#e7600d]'>CAM</span><span className='text-[#1E3A8A]'>OTE</span></h1>
+                        <h1 className='text-white text-[16px] font-semibold'><span className='text-[#e7600d]'>CAM</span><span className='text-[#243c56]'>OTE</span></h1>
                         <span className='text-white text-[14px]'>North Caloocan City Traffic Office - Complete Violation Case</span>
                     </div>
                     <h1 className='text-white text-[16px] font-semibold px-6 py-6'>{ticket.ticketNo}</h1>
@@ -100,7 +100,7 @@ export default function Ticket() {
                                 <PrinterCheck className="w-4 h-4 text-white" />
                                 Print 
                     </button>
-                    <button className="py-2 px-5 bg-[#1E3A8A] text-white rounded-lg ml-2 hover:bg-[#1E3A8A]/80 transition duration-300 ease-in-out flex items-center font-semibold gap-2 text-[14px] active:scale-[0.98]">
+                    <button className="py-2 px-5 bg-[#0F2744] text-white rounded-lg ml-2 hover:bg-[#0F2744]/80 transition duration-300 ease-in-out flex items-center font-semibold gap-2 text-[14px] active:scale-[0.98]">
                                 <FileText className="w-4 h-4 text-white" />
                                 Export PDF
                     </button>

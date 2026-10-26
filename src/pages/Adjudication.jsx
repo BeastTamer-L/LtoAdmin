@@ -61,7 +61,7 @@ function DetailCard({ title, subtitle, children, className = "" }) {
     <section
       className={`overflow-hidden rounded-md border border-slate-200 bg-white ${className}`}
     >
-      <header className="bg-[#1E3A8A] px-5 py-4 text-white">
+      <header className="bg-[#102D4A] px-5 py-4 text-white">
         <h2 className="text-sm font-bold uppercase">{title}</h2>
         <p className="mt-1 text-xs text-slate-300">{subtitle}</p>
       </header>
@@ -78,7 +78,7 @@ function VideoPlaceholder({ label, className = "" }) {
           <Play size={24} fill="currentColor" />
         </span>
       </div>
-      <p className="mt-2 truncate text-sm font-semibold text-[#1E3A8A]">
+      <p className="mt-2 truncate text-sm font-semibold text-[#102D4A]">
         {label}
       </p>
     </div>
@@ -138,7 +138,7 @@ export default function Adjudication() {
           </button>
 
           <section className="overflow-hidden rounded-md border border-slate-200 bg-white">
-            <header className="bg-[#1E3A8A] px-5 py-3 text-white">
+            <header className="bg-[#102D4A] px-5 py-3 text-white">
               <h2 className="text-sm font-bold uppercase">
                 PTSMD Adjudication Action
               </h2>
@@ -179,7 +179,7 @@ export default function Adjudication() {
                         value={option}
                         checked={resolution === option}
                         onChange={(event) => setResolution(event.target.value)}
-                        className="accent-[#1E3A8A]"
+                        className="accent-[#102D4A]"
                       />
                       {option}
                     </label>
@@ -208,7 +208,7 @@ export default function Adjudication() {
                 }));
                 setRulingMessage("Ruling saved.");
               }}
-              className="rounded-md bg-[#1E3A8A] px-6 py-3 text-sm font-medium text-white hover:bg-[#2A4A9E]"
+              className="rounded-md bg-[#102D4A] px-6 py-3 text-sm font-medium text-white hover:bg-[#1a3b5c]"
             >
               Save Ruling
             </button>
@@ -343,10 +343,10 @@ export default function Adjudication() {
                           className={`max-w-xl border-l-4 px-3 py-2 ${
                             speaker === "Enforcer"
                               ? "border-orange-500"
-                              : "border-[#1E3A8A]"
+                              : "border-[#102D4A]"
                           }`}
                         >
-                          <p className="text-xs font-bold text-[#1E3A8A]">
+                          <p className="text-xs font-bold text-[#102D4A]">
                             {speaker}
                           </p>
                           <div className="flex items-end justify-between gap-3">

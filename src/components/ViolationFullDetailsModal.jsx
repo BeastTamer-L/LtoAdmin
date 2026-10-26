@@ -56,7 +56,7 @@ const printTicket = (record) => {
   @page { margin: 14mm; }
   * { box-sizing: border-box; }
   body { margin: 0; font-family: Inter, Arial, sans-serif; color: #0f172a; font-size: 13px; }
-  header { display: flex; align-items: center; justify-content: space-between; background: #1E3A8A; color: #fff; padding: 12px 16px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  header { display: flex; align-items: center; justify-content: space-between; background: #102D4A; color: #fff; padding: 12px 16px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   header .brand { display: flex; align-items: center; gap: 10px; }
   header img { height: 32px; width: 32px; object-fit: contain; }
   header .name { font-size: 16px; font-weight: 900; letter-spacing: -0.02em; }
@@ -106,7 +106,7 @@ export default function ViolationFullDetailsModal({ record, onClose }) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4 backdrop-blur-sm">
         <div className="relative flex max-h-[90vh] w-full flex-col overflow-hidden rounded-lg border border-slate-100 bg-white shadow-2xl sm:max-w-4xl">
-          <header className="flex shrink-0 items-center justify-between gap-4 bg-[#1E3A8A] px-4 py-3 text-white md:px-5">
+          <header className="flex shrink-0 items-center justify-between gap-4 bg-[#102D4A] px-4 py-3 text-white md:px-5">
             <div className="flex items-center gap-2">
               <img src={Logo} alt="CAMOTE" className="h-8 w-8 object-contain" />
               <div>
@@ -211,7 +211,7 @@ export default function ViolationFullDetailsModal({ record, onClose }) {
               <button
                 type="button"
                 onClick={() => printTicket(record)}
-                className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-md bg-[#1E3A8A] px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-[#2A4A9E]"
+                className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-md bg-[#102D4A] px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-[#1a3b5c]"
               >
                 <Printer size={16} />
                 Print

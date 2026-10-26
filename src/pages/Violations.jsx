@@ -255,7 +255,7 @@ export default function Violations() {
                         }
                       }}
                     >
-                      <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-[#1E3A8A]">{record.uovrNo}</td>
+                      <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-[#0F2744]">{record.uovrNo}</td>
                       <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">{record.date}</td>
                       <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">{record.time}</td>
                       <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">{record.enforcer}</td>

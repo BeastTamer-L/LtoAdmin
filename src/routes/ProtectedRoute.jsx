@@ -29,7 +29,7 @@ export default function ProtectedRoute({ allowedRoles }) {
           <button
             type="button"
             onClick={() => supabase.auth.signOut()}
-            className="cursor-pointer rounded-md bg-[#1E3A8A] px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-[#2A4A9E]"
+            className="cursor-pointer rounded-md bg-[#0F2744] px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-[#173A64]"
           >
             Sign out
           </button>
