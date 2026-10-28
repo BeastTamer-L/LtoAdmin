@@ -142,7 +142,7 @@ const printTicket = (record, imageUrl) => {
 <div class="sigs">${signatures}</div>
 <h2>Violation Transcript</h2>${transcript}
 <h2>Captured Images</h2>${image}
-<h2>Video Recording</h2><p class="muted">${record.videoPath ? "The CAMote video is saved with this ticket (watch it in the admin)." : videoMessage(record)}</p>
+<h2>Video Recording</h2><p class="muted">${record.videoPath ? "The CAMote video is saved with this ticket." : videoMessage(record)}</p>
 </body></html>`;
 
   const frame = document.createElement("iframe");
