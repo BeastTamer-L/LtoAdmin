@@ -28,7 +28,7 @@ export default function ProtectedRoute({ allowedRoles }) {
           <p className="max-w-sm text-sm text-slate-500">Your account does not have access to this page. Sign out and use an administrator account.</p>
           <button
             type="button"
-            onClick={() => supabase.auth.signOut()}
+            onClick={() => supabase.auth.signOut({ scope: 'local' })}
             className="cursor-pointer rounded-md bg-[#0F2744] px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-[#173A64]"
           >
             Sign out

@@ -7,4 +7,8 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.error('Supabase credentials missing! Check your .env file.')
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Its own storage key (LTO admin): the other CAMOTE sites use the same Supabase project and may run on the same
+// localhost address; with the default key one site's login replaced (and signed out) the other's.
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: { storageKey: 'camote-lto-admin-auth' },
+})

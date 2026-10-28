@@ -9,6 +9,7 @@ import {
 import Logo from '../assets/logo.png'
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../supabaseClient';
+import { mayUseAdminSite } from "../lib/adminAccess";
 import { cn } from '../../lib/utils';
 import { sanitizeEmail } from '../../lib/security/sanitize';
 import { useSecuredCountdown } from '../../lib/security/useSecuredCountdown';
@@ -124,6 +125,19 @@ export default function Login() {
           refresh_token: result.session.refreshToken || "",
         });
         if (sessionError) throw sessionError;
+
+        // Only staff accounts: an enforcer or an LTMS portal driver gets the same error as a wrong password
+        const { data: signedInProfile } = await supabase
+          .from('profiles')
+          .select('id, role')
+          .eq('id', result.user.id)
+          .maybeSingle();
+        const { data: { user: signedInUser } } = await supabase.auth.getUser();
+        if (!mayUseAdminSite(signedInProfile, signedInUser)) {
+          await supabase.auth.signOut({ scope: 'local' });
+          setError(GENERIC_AUTH_ERROR);
+          return;
+        }
 
         // Now the local Supabase client has a valid session.
         // Let AuthContext pick it up by navigating.

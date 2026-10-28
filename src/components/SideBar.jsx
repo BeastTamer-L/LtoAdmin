@@ -74,7 +74,7 @@ export default function Sidebar() {
 
   const handleConfirm = async () => {
     try {
-      await supabase.auth.signOut();
+      await supabase.auth.signOut({ scope: 'local' });
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
