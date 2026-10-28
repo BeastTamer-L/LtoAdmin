@@ -1,7 +1,7 @@
 import { supabase } from "../supabaseClient";
 
 export const TICKET_SELECT =
-  "id, uovr_number, issued_by, ticket_status, officer_signature_data, driver_signature_data, driver_full_name, driver_date_of_birth, driver_license_no, plate_no, vehicle_type, vehicle_status, violation_location, violation_date, violation_time, violations, license_confiscated, plate_confiscated, towed, impounded, vehicle_image_uri, pi_video_on_device, pi_transcript_status, pi_transcript";
+  "id, uovr_number, issued_by, ticket_status, officer_signature_data, driver_signature_data, driver_full_name, driver_date_of_birth, driver_license_no, plate_no, vehicle_type, vehicle_status, violation_location, violation_date, violation_time, violations, license_confiscated, plate_confiscated, towed, impounded, vehicle_image_uri, pi_video_on_device, pi_video_status, pi_video_path, pi_transcript_status, pi_transcript";
 
 // A ticket has no status column, so it is derived from what happened at the stop
 export const deriveStatus = (ticket) => {
@@ -78,6 +78,11 @@ export const toViolationRecord = (ticket, profile, ltoCodeByName) => {
     driverSignature: ticket.driver_signature_data,
     imageUri: ticket.vehicle_image_uri,
     videoOnDevice: ticket.pi_video_on_device,
+    videoStatus: ticket.pi_video_status,
+    // storage path in the private ticket-files bucket, only once the CAMote has finished uploading it
+    videoPath: ticket.pi_video_status === "uploaded" ? ticket.pi_video_path : null,
+    // transcription confidence / phonetic fixes, worked out on the CAMote after the session (null on older tickets)
+    transcriptQuality: ticket.pi_transcript?.quality || null,
     transcriptStatus: ticket.pi_transcript_status,
     transcriptLines: (ticket.pi_transcript?.lines || []).filter((line) => line.in_case !== false && line.text),
   };

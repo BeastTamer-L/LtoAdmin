@@ -1,6 +1,58 @@
+import { useEffect, useState } from "react";
 import { ChevronDown, FileDown, Printer } from "lucide-react";
 import Logo from "../assets/logo.png";
 import { formatClock } from "../lib/violationRecords";
+import { supabase } from "../supabaseClient";
+
+// A file of the ticket in the private ticket-files bucket (vehicle photo, CAMote video) as a one-hour signed link.
+// Admins may read the bucket (app migration 20261027090000). A full http(s) address is used as it is.
+const useTicketFile = (path) => {
+  const [file, setFile] = useState({ path: null, url: null, failed: false });
+  const isLink = /^https?:\/\//.test(path || "");
+
+  useEffect(() => {
+    if (!path || isLink) return undefined;
+    let cancelled = false;
+    supabase.storage
+      .from("ticket-files")
+      .createSignedUrl(path, 60 * 60)
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        if (error || !data?.signedUrl) console.error("Failed to load a ticket file:", error);
+        setFile({ path, url: data?.signedUrl || null, failed: !data?.signedUrl });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [path, isLink]);
+
+  if (!path) return { url: null, loading: false, failed: false };
+  if (isLink) return { url: path, loading: false, failed: false };
+  const current = file.path === path;
+  return { url: current ? file.url : null, loading: !current, failed: current && file.failed };
+};
+
+// The Voice ID label of a line, as in the app: enforcer / driver ('-' = no voiceprint check for that case)
+const speakerLabel = (line) =>
+  line.speaker === "enforcer" ? "Enforcer" : line.speaker === "driver" ? "Driver" : null;
+
+const lineTime = (line) =>
+  line.t1 !== undefined && line.t1 !== null ? `${formatClock(line.t0)}–${formatClock(line.t1)}` : formatClock(line.t0);
+
+const qualityText = (quality) =>
+  [
+    quality?.confidence_pct != null && `Transcription confidence: ${Math.round(quality.confidence_pct)}%`,
+    quality?.phonetic_pct != null && `Phonetic fixes used: ${Math.round(quality.phonetic_pct)}%`,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+const videoMessage = (record) =>
+  record.videoStatus === "failed"
+    ? "The video could not be uploaded. It is still kept on the CAMote device."
+    : record.videoOnDevice || record.videoStatus
+      ? "The video is kept on the CAMote device and has not been uploaded yet."
+      : "No video recording is attached to this violation.";
 
 const getDetailFields = (record) => [
   ["Enforcer", record.enforcerName],
@@ -28,7 +80,7 @@ const escapeHtml = (value) =>
   String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
 
 // Print (or save as PDF) just the ticket, from a hidden frame so the page's own layout cannot interfere
-const printTicket = (record) => {
+const printTicket = (record, imageUrl) => {
   const logoUrl = new URL(Logo, window.location.href).href;
   const fields = getDetailFields(record)
     .map(([label, value]) => `<div class="field"><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value || "—")}</dd></div>`)
@@ -44,11 +96,16 @@ const printTicket = (record) => {
   const transcript =
     record.transcriptLines.length > 0
       ? `<ul>${record.transcriptLines
-          .map((line) => `<li><span class="time">${formatClock(line.t0)}</span>${escapeHtml(line.text)}</li>`)
-          .join("")}</ul>`
+          .map(
+            (line) =>
+              `<li><span class="time">${lineTime(line)}</span>${
+                speakerLabel(line) ? `<b>${speakerLabel(line)}:</b> ` : ""
+              }${escapeHtml(line.text)}</li>`
+          )
+          .join("")}</ul>${record.transcriptQuality ? `<p class="muted">${escapeHtml(qualityText(record.transcriptQuality))}</p>` : ""}`
       : `<p class="muted">No transcript is available for this violation.</p>`;
-  const image = /^https?:\/\//.test(record.imageUri || "")
-    ? `<img class="photo" src="${escapeHtml(record.imageUri)}" alt="Captured vehicle" />`
+  const image = imageUrl
+    ? `<img class="photo" src="${escapeHtml(imageUrl)}" alt="Captured vehicle" />`
     : `<p class="muted">No captured images are attached to this violation.</p>`;
 
   const html = `<!doctype html><html><head><meta charset="utf-8"><title>UOVR ${escapeHtml(record.uovrNo)}</title>
@@ -85,7 +142,7 @@ const printTicket = (record) => {
 <div class="sigs">${signatures}</div>
 <h2>Violation Transcript</h2>${transcript}
 <h2>Captured Images</h2>${image}
-<h2>Video Recording</h2><p class="muted">${record.videoOnDevice ? "The video for this violation is stored on the enforcer's device." : "No video recording is attached to this violation."}</p>
+<h2>Video Recording</h2><p class="muted">${record.videoPath ? "The CAMote video is saved with this ticket (watch it in the admin)." : videoMessage(record)}</p>
 </body></html>`;
 
   const frame = document.createElement("iframe");
@@ -101,7 +158,8 @@ const printTicket = (record) => {
 
 export default function ViolationFullDetailsModal({ record, onClose }) {
     const detailFields = getDetailFields(record);
-    const hasImage = /^https?:\/\//.test(record.imageUri || "");
+    const image = useTicketFile(record.imageUri);
+    const video = useTicketFile(record.videoPath);
 
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4 backdrop-blur-sm">
@@ -156,14 +214,32 @@ export default function ViolationFullDetailsModal({ record, onClose }) {
                   <ChevronDown size={18} className="transition group-open:rotate-180" />
                 </summary>
                 {record.transcriptLines.length > 0 ? (
-                  <ul className="space-y-1.5 py-3 text-sm text-slate-600">
-                    {record.transcriptLines.map((line, index) => (
-                      <li key={index} className="flex gap-3">
-                        <span className="shrink-0 font-mono text-xs text-slate-400">{formatClock(line.t0)}</span>
-                        <span>{line.text}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  <div className="py-3">
+                    {record.transcriptQuality ? (
+                      <p className="mb-3 text-xs font-medium text-slate-500">{qualityText(record.transcriptQuality)}</p>
+                    ) : null}
+                    <ul className="space-y-2">
+                      {record.transcriptLines.map((line, index) => {
+                        const speaker = speakerLabel(line);
+                        return (
+                          <li
+                            key={index}
+                            className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${
+                              speaker === "Driver" ? "ml-auto bg-slate-100 text-slate-700" : "bg-blue-50 text-slate-800"
+                            }`}
+                          >
+                            <div className="mb-0.5 flex items-center gap-2 text-xs">
+                              {speaker ? (
+                                <span className={`font-semibold ${speaker === "Driver" ? "text-slate-600" : "text-[#102D4A]"}`}>{speaker}</span>
+                              ) : null}
+                              <span className="font-mono text-slate-400">{lineTime(line)}</span>
+                            </div>
+                            <p>{line.text}</p>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
                 ) : (
                   <p className="py-3 text-sm text-slate-500">
                     {record.transcriptStatus === "pending"
@@ -177,11 +253,15 @@ export default function ViolationFullDetailsModal({ record, onClose }) {
                   Captured Images
                   <ChevronDown size={18} className="transition group-open:rotate-180" />
                 </summary>
-                {hasImage ? (
-                  <img src={record.imageUri} alt="Captured vehicle" className="my-3 max-h-80 rounded-md border border-slate-200 object-contain" />
+                {image.url ? (
+                  <img src={image.url} alt="Captured vehicle" className="my-3 max-h-80 rounded-md border border-slate-200 object-contain" />
                 ) : (
                   <p className="py-3 text-sm text-slate-500">
-                    No captured images are attached to this violation.
+                    {image.loading
+                      ? "Loading the captured image..."
+                      : image.failed
+                        ? "The captured image could not be loaded."
+                        : "No captured images are attached to this violation."}
                   </p>
                 )}
               </details>
@@ -190,11 +270,17 @@ export default function ViolationFullDetailsModal({ record, onClose }) {
                   Video Recording
                   <ChevronDown size={18} className="transition group-open:rotate-180" />
                 </summary>
-                <p className="py-3 text-sm text-slate-500">
-                  {record.videoOnDevice
-                    ? "The video for this violation is stored on the enforcer's device."
-                    : "No video recording is attached to this violation."}
-                </p>
+                {video.url ? (
+                  <video src={video.url} controls preload="metadata" playsInline className="my-3 aspect-video w-full rounded-md bg-black" />
+                ) : (
+                  <p className="py-3 text-sm text-slate-500">
+                    {video.loading
+                      ? "Loading the video..."
+                      : video.failed
+                        ? "The video could not be loaded."
+                        : videoMessage(record)}
+                  </p>
+                )}
               </details>
             </div>
           </div>
@@ -210,7 +296,7 @@ export default function ViolationFullDetailsModal({ record, onClose }) {
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
-                onClick={() => printTicket(record)}
+                onClick={() => printTicket(record, image.url)}
                 className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-md bg-[#102D4A] px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-[#1a3b5c]"
               >
                 <Printer size={16} />
@@ -218,7 +304,7 @@ export default function ViolationFullDetailsModal({ record, onClose }) {
               </button>
               <button
                 type="button"
-                onClick={() => printTicket(record)}
+                onClick={() => printTicket(record, image.url)}
                 title="Choose Save as PDF in the print dialog"
                 className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-md bg-green-500 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-green-600"
               >
